@@ -1,12 +1,11 @@
 #include "rpc.h"
 
-bool Rpc::structRpcMethodParams(const std::string method, const json &params, json &post)
+void structRpcMethodParams(const std::string method, const json &params, json &post)
 {
     post["jsonrpc"] = "1.0";
     post["id"] = "curltest";
     post["method"] = method;
     post["params"] = params;
-    return true;
 }
 
 bool Rpc::getBlockCount(uint64_t &height)
@@ -67,6 +66,28 @@ bool Rpc::getBlock(const std::string &hash, std::vector<std::string> &txs)
     return true;
 }
 
+std::string getSenderAddress(const Vin vin)
+{
+    std::string res = "";
+    json json_post;
+    json json_params;
+    json_params.push_back(vin.txid);
+    json_params.push_back(true);
+    structRpcMethodParams("getrawtransaction", json_params, json_post);
+    std::string response;
+    if (!CurlPost(json_post.dump(), response))
+    {
+        LOG(ERROR) << "getSenderAddress error txid = " << vin.txid;
+        return res;
+    }
+
+    json json_response = json::parse(response);
+    json json_result = json_response["result"];
+    json vout = json_result["vout"].at(vin.n);
+    res = vout["scriptPubKey"]["addresses"].at(0).get<std::string>();
+    return res;
+}
+
 bool Rpc::getTransaction(const std::string &hash, Tx &tx)
 {
     json json_post;
@@ -81,7 +102,6 @@ bool Rpc::getTransaction(const std::string &hash, Tx &tx)
         return false;
     }
 
-    std::cout << response << std::endl;
     json json_response = json::parse(response);
     json json_result = json_response["result"];
     json json_vout = json_result["vout"];
@@ -91,8 +111,8 @@ bool Rpc::getTransaction(const std::string &hash, Tx &tx)
     { 
         vin.txid = json_vin.at(i)["txid"].get<std::string>();
         vin.n = json_vin.at(i)["vout"].get<int>();
+        tx.vins.push_back(vin);
     }  	
-    tx.vins.push_back(vin);
 
     tx.data = false;
     Vout vout;
@@ -108,11 +128,32 @@ bool Rpc::getTransaction(const std::string &hash, Tx &tx)
 	    vout.amount = std::to_string(amount);
 	    tx.vouts.push_back(vout);
 	} else {
-            if (json_vout.size() == 2) 
+            if (json_vout.size() == 2 || json_vout.size() == 3) {
                 tx.data = true;
+                tx.sender = getSenderAddress(tx.vins.at(0));
+            }
 	}
     }
+    return true;
+}
 
+bool Rpc::getMempool(std::vector<std::string>& txs)
+{
+    json json_post;
+    json json_params = json::array();
+    structRpcMethodParams("getrawmempool", json_params, json_post);
+    std::string response;
+    if (!CurlPost(json_post.dump(), response))
+    {
+        LOG(ERROR) << "getMempool error";
+        return false;
+    }
+
+    json json_response = json::parse(response);
+    json res = json_response["result"];
+    for (int i = 0; i < res.size(); ++i) {
+        txs.push_back(res.at(i));
+    }
     return true;
 }
 

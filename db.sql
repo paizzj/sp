@@ -8,10 +8,11 @@ CREATE TABLE `block` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `tx` (
-  `address` varchar(100) NOT NULL,
+  `sender` varchar(100) NOT NULL,
+  `recipient` varchar(100) NOT NULL,
   `txid` varchar(200) NOT NULL,
   `height` bigint(20) NOT NULL,
-  PRIMARY KEY (`address`,`txid`)
+  PRIMARY KEY (`recipient`,`txid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `utxo` (

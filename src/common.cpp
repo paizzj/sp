@@ -1,6 +1,6 @@
 #include "common.h"
 
-std::unique_ptr<ConfManager>confptr(new ConfManager);
+std::unique_ptr<ConfManager> confptr(new ConfManager);
 
 std::string ConfManager::getArgs(const std::string& strArg,const std::string& strDefault)
 {
@@ -190,14 +190,14 @@ bool InitDB()
 
 bool GetLastHeight(uint64_t &height)
 {
-    std::string select_sql = "select blockcount from block";
+    std::string sql = "select blockcount from block";
 
     DBMysql::JsonDataFormat json_format;
     json_format.column_size = 1;
     json_format.map_column_type[0] = DBMysql::INT;
 
     json json_data;
-    bool ret = g_db_mysql->GetDataAsJson(select_sql, &json_format, json_data);
+    bool ret = g_db_mysql->GetDataAsJson(sql, &json_format, json_data);
 
     if (!ret)
     {
@@ -205,8 +205,32 @@ bool GetLastHeight(uint64_t &height)
         return false;
     }
 
-    json json_value = json_data.at(0);
     height = json_data.at(0).at(0).get<uint64_t>();
     return true;
 }
 
+bool GetPools(std::vector<std::string>& pools)
+{
+    std::string sql = "select distinct txid from utxo where height=0";
+
+    DBMysql::JsonDataFormat json_format;
+    json_format.column_size = 1;
+    json_format.map_column_type[0] = DBMysql::STRING;
+
+    json json_data;
+    bool ret = g_db_mysql->GetDataAsJson(sql, &json_format, json_data);
+
+    if (!ret)
+    {
+        LOG(ERROR) << "GetPools error";
+        return false;
+    }
+
+    std::string txid = "";
+    for (int i = 0; i < json_data.size(); ++i) {
+        json json_value = json_data.at(i);
+        txid = json_value.at(0).get<std::string>();
+        pools.push_back(txid);
+    }
+    return true;
+}

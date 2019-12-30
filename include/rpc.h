@@ -22,6 +22,7 @@ struct Tx
     std::vector<Vout> vouts;
     uint64_t height;
     bool data;
+    std::string sender;
 };
 
 class Rpc
@@ -34,8 +35,10 @@ public:
     bool getBlockHash(const uint64_t& height, std::string& hash);
     bool getBlock(const std::string& hash, std::vector<std::string>& txs);
     bool getTransaction(const std::string& hash, Tx& tx);
-    bool structRpcMethodParams(const std::string method, const json& params, json& post);
+    bool getMempool(std::vector<std::string>& txs);
 };
+
+void structRpcMethodParams(const std::string method, const json& params, json& post);
 
 #endif // RPC_H
 

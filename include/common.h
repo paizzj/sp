@@ -31,17 +31,18 @@ public:
 
 private:
     void readConfJsonObj(const json js);
-private:
+
     std::string path_;
     json conf_;
     std::map<std::string,std::string> mapArgs_;
 };
 
-extern std::unique_ptr<ConfManager>confptr;
+extern std::unique_ptr<ConfManager> confptr;
 
 bool ParseCmd(int argc, char*argv[]);
 bool InitDB();
-bool GetLastHeight(uint64_t &height);
+bool GetLastHeight(uint64_t& height);
+bool GetPools(std::vector<std::string>& pools);
 bool CurlPost(const std::string& data, std::string& response);
 
 #endif

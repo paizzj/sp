@@ -21,8 +21,15 @@ int main(int argc,char*argv[])
         std::cout << "GetLastHeight error" << std::endl;
         return 0;
     }
-    std::cout << "height = " << height << std::endl;
-    g_syncer.syncBlocks(height);
+
+    std::vector<std::string> pools;
+    if (!GetPools(pools))
+    {
+        std::cout << "GetPools error" << std::endl;
+        return 0;
+    }
+
+    g_syncer.syncBlocks(height, pools);
 
     return 0;
 }
