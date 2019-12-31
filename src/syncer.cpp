@@ -33,16 +33,17 @@ void CSyncer::syncBlocks(uint64_t height, std::vector<std::string>& pools)
   std::vector<Tx> txs;
   std::vector<std::string> updates;
 
-  std::cout << "height = " << height << std::endl;
   std::cout << "pools.size = " << pools.size() << std::endl;
 
   while (true) {
+    std::cout << "height = " << height << std::endl;
+    std::cout << "node_height = " << node_height << std::endl;
+
     if (height >= node_height) {
       if (!rpc->getBlockCount(node_height))
         break;
 
-      std::cout << "node_height = " << node_height << std::endl;
-      usleep(5 * 1000 * 1000);
+      usleep(3 * 1000 * 1000);
 
       if (height == node_height) {
         txids.clear();

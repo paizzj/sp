@@ -118,14 +118,15 @@ bool Rpc::getTransaction(const std::string &hash, Tx &tx)
     Vout vout;
     for (int i = 0; i < json_vout.size(); ++i)
     {
-        double amount = json_vout.at(i)["value"].get<double>();
-	if (amount != 0) {
+        std::string amount = json_vout.at(i)["value"].get<std::string>();
+        double a = atof(amount.c_str());
+	if (a != 0) {
 	    std::string script = json_vout.at(i)["scriptPubKey"]["hex"].get<std::string>();
             std::string address = json_vout.at(i)["scriptPubKey"]["addresses"].at(0).get<std::string>();
  	    vout.out = i;
 	    vout.script = script;
 	    vout.address = address;
-	    vout.amount = std::to_string(amount);
+	    vout.amount = amount;
 	    tx.vouts.push_back(vout);
 	} else {
             if (json_vout.size() == 2 || json_vout.size() == 3) {
