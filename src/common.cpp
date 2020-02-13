@@ -129,12 +129,13 @@ bool CurlPost(const std::string& data, std::string& response)
     if (res != CURLE_OK)
     {
         error_str = curl_easy_strerror(res);
-        LOG(ERROR) << error_str ;
+        LOG(ERROR) << "CurlPost error: " << error_str ;
         return false;
     }
 
     if (response.empty() || response == "")
     {
+        LOG(ERROR) << "CurlPost response empty";
         return false;
     }
     return true;

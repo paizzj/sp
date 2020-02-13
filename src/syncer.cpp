@@ -21,6 +21,7 @@ void remove(std::vector<std::string>& vec, std::string txid)
       it = vec.erase(it);
       break;
     }
+    it++;
   }
 }
 
@@ -33,26 +34,34 @@ void CSyncer::syncBlocks(uint64_t height, std::vector<std::string>& pools)
   std::vector<Tx> txs;
   std::vector<std::string> updates;
 
-  std::cout << "pools.size = " << pools.size() << std::endl;
+std::cout << "pools.size = " << pools.size() << std::endl;
+LOG(INFO) << "pools.size = " << pools.size();
 
   while (true) {
-    std::cout << "height = " << height << std::endl;
-    std::cout << "node_height = " << node_height << std::endl;
-
     if (height >= node_height) {
-      if (!rpc->getBlockCount(node_height))
-        break;
+      if (!rpc->getBlockCount(node_height)) {
+LOG(INFO) << "loop == 43";
+        goto loop;
+      }
+
+std::cout << "height = " << height << std::endl;
+std::cout << "node_height = " << node_height << std::endl;
+LOG(INFO) << "height = " << height;
+LOG(INFO) << "node_height = " << node_height;
 
       usleep(3 * 1000 * 1000);
 
       if (height == node_height) {
         txids.clear();
-        if (!rpc->getMempool(txids))
-          break;
+        if (!rpc->getMempool(txids)) {
+LOG(INFO) << "loop == 57";
+	  goto loop;
+        }
 
         if (txids.size() > pools.size()) {
           if (!handlePoolTxs(rpc, pools, txids)) {
-            break;
+LOG(INFO) << "loop == 63";
+	    goto loop;
           }
         }
         continue;
@@ -60,12 +69,17 @@ void CSyncer::syncBlocks(uint64_t height, std::vector<std::string>& pools)
     }
 
     height++;
-    if (!rpc->getBlockHash(height, hash))
-      break;
+    if (!rpc->getBlockHash(height, hash)) {
+LOG(INFO) << "loop == 73";
+      height--;
+      goto loop;
+    }
 
     txids.clear();
-    if (!rpc->getBlock(hash, txids))
-      break;
+    if (!rpc->getBlock(hash, txids)) {
+LOG(INFO) << "loop == 80";
+      goto loop;
+    }
 
     // ignore coinbase tx
     if (txids.size() > 1) {
@@ -77,30 +91,48 @@ void CSyncer::syncBlocks(uint64_t height, std::vector<std::string>& pools)
           Tx tx;
           tx.txid = txids.at(i);
           tx.height = height;
-          if (!rpc->getTransaction(txids.at(i), tx))
-	    return;
-			
+          if (!rpc->getTransaction(txids.at(i), tx)) {
+LOG(INFO) << "loop == 95";
+            goto loop;
+	  }
+
 	  txs.push_back(tx);
         }
       }		
     }
 
-    if (txs.size() > 19 || updates.size() > 0 || height % 100 == 0 || height >= node_height) {
-      if (!flushTxToDB(txs, height))
-        break;
+    std::cout << "=========104" << std::endl;
+    std::cout << "height = " << height << std::endl;
+    std::cout << "node_height = " << node_height << std::endl;
+    std::cout << "txs.size = " << txs.size() << std::endl;
+    std::cout << "updates.size = " << updates.size() << std::endl;
 
-      if (!updateDB(updates, height))
-        break;
+    if (txs.size() > 19 || updates.size() > 0 || height % 100 == 0 || height >= node_height) {
+      if (!flushTxToDB(txs, height)) {
+LOG(INFO) << "loop == 112";
+	goto loop;
+      }
+
+      if (!updateDB(updates, height)) {
+LOG(INFO) << "loop == 117";
+	goto loop;
+      }
 
       for (int i = 0; i < updates.size(); ++i) {
         remove(pools, updates.at(i));
       }
 
-      LOG(INFO) << "scan to " << height;
-      std::cout << "scan to " << height << std::endl;
+LOG(INFO) << "scan to " << height;
+std::cout << "scan to " << height << std::endl;
       txs.clear();
       updates.clear();
     }
+
+std::cout << "=========131" << std::endl;
+    continue;
+
+loop:
+    usleep(3 * 1000 * 1000);
   }
 }
 

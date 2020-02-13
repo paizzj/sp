@@ -20,7 +20,13 @@ bool Rpc::getBlockCount(uint64_t &height)
         return false;
     }
 
+LOG(INFO) << "getBlockCount: " << response;
     json json_response = json::parse(response);
+    if (json_response["result"].is_null()) {
+        LOG(ERROR) << "getBlockCount: " << response;
+        return false;
+    }
+
     height = json_response["result"].get<uint64_t>();
     return true;
 }
@@ -38,7 +44,13 @@ bool Rpc::getBlockHash(const uint64_t &height, std::string &hash)
         return false;
     }
 
+LOG(INFO) << "getBlockHash: " << response;
     json json_response = json::parse(response);
+    if (json_response["result"].is_null()) {
+        LOG(ERROR) << "getBlockHash: " << response;
+        return false;
+    }
+
     hash = json_response["result"].get<std::string>();
     return true;
 }
@@ -56,7 +68,13 @@ bool Rpc::getBlock(const std::string &hash, std::vector<std::string> &txs)
         return false;
     }
 
+LOG(INFO) << "getBlock: " << response;
     json json_response = json::parse(response);
+    if (json_response["result"].is_null()) {
+        LOG(ERROR) << "getBlock: " << response;
+        return false;
+    }
+
     json json_result = json_response["result"];
     json json_txs = json_result["tx"];
     for (uint i = 0; i < json_txs.size(); i++)
@@ -81,6 +99,7 @@ std::string getSenderAddress(const Vin vin)
         return res;
     }
 
+LOG(INFO) << "getSenderAddress: " << response;
     json json_response = json::parse(response);
     json json_result = json_response["result"];
     json vout = json_result["vout"].at(vin.n);
@@ -102,7 +121,13 @@ bool Rpc::getTransaction(const std::string &hash, Tx &tx)
         return false;
     }
 
+LOG(INFO) << "getTransaction: " << response;
     json json_response = json::parse(response);
+    if (json_response["result"].is_null()) {
+        LOG(ERROR) << "getTransaction: " << response;
+        return false;
+    }
+
     json json_result = json_response["result"];
     json json_vout = json_result["vout"];
     json json_vin = json_result["vin"];
@@ -150,7 +175,13 @@ bool Rpc::getMempool(std::vector<std::string>& txs)
         return false;
     }
 
+LOG(INFO) << "getMempool: " << response;
     json json_response = json::parse(response);
+    if (json_response["result"].is_null()) {
+        LOG(ERROR) << "getMempool: " << response;
+        return false;
+    }
+
     json res = json_response["result"];
     for (int i = 0; i < res.size(); ++i) {
         txs.push_back(res.at(i));
