@@ -20,7 +20,7 @@ bool Rpc::getBlockCount(uint64_t &height)
         return false;
     }
 
-LOG(INFO) << "getBlockCount: " << response;
+//LOG(INFO) << "getBlockCount: " << response;
     json json_response = json::parse(response);
     if (json_response["result"].is_null()) {
         LOG(ERROR) << "getBlockCount: " << response;
@@ -44,7 +44,7 @@ bool Rpc::getBlockHash(const uint64_t &height, std::string &hash)
         return false;
     }
 
-LOG(INFO) << "getBlockHash: " << response;
+//LOG(INFO) << "getBlockHash: " << response;
     json json_response = json::parse(response);
     if (json_response["result"].is_null()) {
         LOG(ERROR) << "getBlockHash: " << response;
@@ -68,7 +68,7 @@ bool Rpc::getBlock(const std::string &hash, std::vector<std::string> &txs)
         return false;
     }
 
-LOG(INFO) << "getBlock: " << response;
+//LOG(INFO) << "getBlock: " << response;
     json json_response = json::parse(response);
     if (json_response["result"].is_null()) {
         LOG(ERROR) << "getBlock: " << response;
@@ -99,7 +99,7 @@ std::string getSenderAddress(const Vin vin)
         return res;
     }
 
-LOG(INFO) << "getSenderAddress: " << response;
+//LOG(INFO) << "getSenderAddress: " << response;
     json json_response = json::parse(response);
     json json_result = json_response["result"];
     json vout = json_result["vout"].at(vin.n);
@@ -121,7 +121,7 @@ bool Rpc::getTransaction(const std::string &hash, Tx &tx)
         return false;
     }
 
-LOG(INFO) << "getTransaction: " << response;
+//LOG(INFO) << "getTransaction: " << response;
     json json_response = json::parse(response);
     if (json_response["result"].is_null()) {
         LOG(ERROR) << "getTransaction: " << response;
@@ -130,34 +130,37 @@ LOG(INFO) << "getTransaction: " << response;
 
     json json_result = json_response["result"];
     json json_vout = json_result["vout"];
-    json json_vin = json_result["vin"];
-    Vin vin;
-    for (int i = 0; i < json_vin.size(); ++i) 
-    { 
-        vin.txid = json_vin.at(i)["txid"].get<std::string>();
-        vin.n = json_vin.at(i)["vout"].get<int>();
-        tx.vins.push_back(vin);
-    }  	
 
-    tx.data = false;
+    if (!tx.coinbase) {
+        json json_vin = json_result["vin"];
+        Vin vin;
+        for (int i = 0; i < json_vin.size(); ++i) {
+            vin.txid = json_vin.at(i)["txid"].get<std::string>();
+            vin.n = json_vin.at(i)["vout"].get<int>();
+            tx.vins.push_back(vin);
+        }
+    }
+
     Vout vout;
     for (int i = 0; i < json_vout.size(); ++i)
     {
-        std::string amount = json_vout.at(i)["value"].get<std::string>();
-        double a = atof(amount.c_str());
+        double a = json_vout.at(i)["value"].get<double>();
+        std::stringstream ss;
+	ss << std::setprecision(8) << a;
+	std::string amount = ss.str();
 	if (a != 0) {
-	    std::string script = json_vout.at(i)["scriptPubKey"]["hex"].get<std::string>();
             std::string address = json_vout.at(i)["scriptPubKey"]["addresses"].at(0).get<std::string>();
  	    vout.out = i;
-	    vout.script = script;
 	    vout.address = address;
 	    vout.amount = amount;
 	    tx.vouts.push_back(vout);
 	} else {
-            if (json_vout.size() == 2 || json_vout.size() == 3) {
+	    if (!tx.coinbase) {
                 tx.data = true;
                 tx.sender = getSenderAddress(tx.vins.at(0));
-            }
+	        std::string text = json_vout.at(i)["scriptPubKey"]["hex"].get<std::string>();
+	        tx.text = text;
+	    }
 	}
     }
     return true;
@@ -175,7 +178,7 @@ bool Rpc::getMempool(std::vector<std::string>& txs)
         return false;
     }
 
-LOG(INFO) << "getMempool: " << response;
+//LOG(INFO) << "getMempool: " << response;
     json json_response = json::parse(response);
     if (json_response["result"].is_null()) {
         LOG(ERROR) << "getMempool: " << response;

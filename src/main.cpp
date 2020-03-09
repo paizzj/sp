@@ -23,12 +23,13 @@ int main(int argc,char*argv[])
     }
 
     std::vector<std::string> pools;
+    /*
     if (!GetPools(pools))
     {
         std::cout << "GetPools error" << std::endl;
         return 0;
     }
-
+    */
     g_syncer.syncBlocks(height, pools);
 
     return 0;

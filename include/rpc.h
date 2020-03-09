@@ -22,7 +22,9 @@ struct Tx
     std::vector<Vout> vouts;
     uint64_t height;
     bool data;
+    int coinbase;
     std::string sender;
+    std::string text;
 };
 
 class Rpc

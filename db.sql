@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS `xsv`; 
-USE `xsv`;
+CREATE DATABASE IF NOT EXISTS `fch`;
+USE `fch`;
 
 CREATE TABLE `block` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -8,11 +8,12 @@ CREATE TABLE `block` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `tx` (
-  `sender` varchar(100) NOT NULL,
-  `recipient` varchar(100) NOT NULL,
+  `address` varchar(100) NOT NULL,
   `txid` varchar(200) NOT NULL,
   `height` bigint(20) NOT NULL,
-  PRIMARY KEY (`recipient`,`txid`)
+  `data` text NOT NULL,
+  `status` int(11) DEFAULT '0',
+  PRIMARY KEY (`txid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `utxo` (
@@ -20,7 +21,9 @@ CREATE TABLE `utxo` (
   `txid` varchar(200) NOT NULL,
   `vout` int(11) NOT NULL,
   `amount` varchar(50) NOT NULL,
-  `script` varchar(200) NOT NULL,
   `height` bigint(20) NOT NULL,
-  PRIMARY KEY (`address`,`txid`)
+  `coinbase` int(11) DEFAULT '0',
+  `spent` int(11) DEFAULT '0',
+  PRIMARY KEY (`address`,`txid`),
+  KEY `i_utxo` (`txid`,`vout`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

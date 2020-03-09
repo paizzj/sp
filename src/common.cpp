@@ -184,7 +184,7 @@ bool InitDB()
     connect->user_name = s_conf.getArgs("mysqluser", "root");
     connect->user_pass = s_conf.getArgs("mysqlpass", "a");
     connect->port = std::atoi(s_conf.getArgs("mysqlport", "3306").c_str());
-    connect->use_db = s_conf.getArgs("mysqldb", "xsv");
+    connect->use_db = s_conf.getArgs("mysqldb", "fch");
     g_db_mysql->SetConnect(connect);
     return g_db_mysql->OpenDB();
 }
