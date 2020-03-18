@@ -143,22 +143,24 @@ LOG(INFO) << "getTransaction: " << response;
     Vout vout;
     for (int i = 0; i < json_vout.size(); ++i)
     {
-        std::string amount = json_vout.at(i)["value"].get<std::string>();
-        double a = atof(amount.c_str());
-	if (a != 0) {
-	    std::string script = json_vout.at(i)["scriptPubKey"]["hex"].get<std::string>();
+        double a = json_vout.at(i)["value"].get<double>();
+        std::stringstream ss;
+        ss << std::setprecision(8) << a;
+        std::string amount = ss.str();
+        if (a != 0) {
+            std::string script = json_vout.at(i)["scriptPubKey"]["hex"].get<std::string>();
             std::string address = json_vout.at(i)["scriptPubKey"]["addresses"].at(0).get<std::string>();
- 	    vout.out = i;
-	    vout.script = script;
-	    vout.address = address;
-	    vout.amount = amount;
-	    tx.vouts.push_back(vout);
-	} else {
+            vout.out = i;
+            vout.script = script;
+            vout.address = address;
+            vout.amount = amount;
+            tx.vouts.push_back(vout);
+        } else {
             if (json_vout.size() == 2 || json_vout.size() == 3) {
                 tx.data = true;
                 tx.sender = getSenderAddress(tx.vins.at(0));
             }
-	}
+        }
     }
     return true;
 }
