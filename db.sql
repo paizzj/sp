@@ -24,3 +24,5 @@ CREATE TABLE `utxo` (
   `height` bigint(20) NOT NULL,
   PRIMARY KEY (`address`,`txid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+insert into block (blockcount) values(1);
