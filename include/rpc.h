@@ -18,13 +18,17 @@ struct Vout
 struct Tx
 {
     std::string txid;
-    std::vector<Vin> vins;
-    std::vector<Vout> vouts;
     uint64_t height;
+    int index;
+    int size;
+    long time;
     bool data;
-    int coinbase;
     std::string sender;
     std::string text;
+    std::vector<Vin> vins;
+    std::vector<Vout> vouts;
+    std::string vins_json;
+    std::string vouts_json;
 };
 
 class Rpc

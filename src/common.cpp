@@ -206,7 +206,11 @@ bool GetLastHeight(uint64_t &height)
         return false;
     }
 
-    height = json_data.at(0).at(0).get<uint64_t>();
+    if (json_data.size() == 0) {
+        height = 0;
+    } else {
+        height = json_data.at(0).at(0).get<uint64_t>();
+    }
     return true;
 }
 

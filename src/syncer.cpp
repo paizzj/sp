@@ -1,4 +1,3 @@
-#include <thread>
 #include "common.h"
 #include "syncer.h"
 
@@ -36,7 +35,6 @@ void CSyncer::syncBlocks(uint64_t height, std::vector<std::string>& pools)
   while (true) {
     if (height >= node_height) {
       if (!rpc->getBlockCount(node_height)) {
-LOG(INFO) << "loop == 39";
         goto loop;
       }
 
@@ -51,14 +49,12 @@ LOG(INFO) << "node_height = " << node_height;
 
     height++;
     if (!rpc->getBlockHash(height, hash)) {
-LOG(INFO) << "loop == 54";
       height--;
       goto loop;
     }
 
     txids.clear();
     if (!rpc->getBlock(hash, txids)) {
-LOG(INFO) << "loop == 61";
       goto loop;
     }
 
@@ -67,9 +63,8 @@ LOG(INFO) << "loop == 61";
       tx.txid = txids.at(i);
       tx.height = height;
       tx.data = false;
-      tx.coinbase = (i == 0) ? 1 : 0;
+      tx.index = i;
       if (!rpc->getTransaction(txids.at(i), tx)) {
-LOG(INFO) << "loop == 72";
         goto loop;
       }
       txs.push_back(tx);
@@ -83,7 +78,6 @@ LOG(INFO) << "node_height = " << node_height;
 
     if (txs.size() > 19 || height >= node_height) {
       if (!flushTxToDB(txs, height)) {
-LOG(INFO) << "loop == 81";
 	goto loop;
       }
 
@@ -106,17 +100,23 @@ bool CSyncer::flushTxToDB(std::vector<Tx>& txs, uint64_t height)
 
   for (int i = 0; i < txs.size(); ++i) {
     Tx tx = txs.at(i);
+    sql = "INSERT INTO history (txid,height,idx,tx_size,time,vins,vouts) VALUES (\"" + tx.txid + "\","
+        + std::to_string(tx.height) + "," + std::to_string(tx.index) + "," + std::to_string(tx.size)
+	+ "," + std::to_string(tx.time) + ",\'" + tx.vins_json + "\',\'" + tx.vouts_json + "\')";
+    sqls.push_back(sql);
+
     if (tx.data) {
-      sql = "INSERT INTO tx (address,txid,height,data) VALUES(\"" + tx.sender + "\",\""
+      sql = "INSERT INTO tx (address,txid,height,data) VALUES (\"" + tx.sender + "\",\""
           + tx.txid  + "\"," + std::to_string(tx.height) + ",\"" + tx.text + "\")";
       sqls.push_back(sql);
     }
    
     for (int j = 0; j < tx.vouts.size(); ++j) {
       Vout vout = tx.vouts.at(j);
-      sql = "INSERT INTO utxo (address,txid,vout,amount,height,coinbase,spent) VALUES(\""
+      int cb = tx.index > 0 ? 0 : 1;
+      sql = "INSERT INTO utxo (address,txid,vout,amount,height,coinbase,spent) VALUES (\""
 	  + vout.address + "\",\"" + tx.txid + "\"," + std::to_string(vout.out) + ",\"" + vout.amount + "\","
-          + std::to_string(tx.height) + "," + std::to_string(tx.coinbase) + ",0)";
+          + std::to_string(tx.height) + "," + std::to_string(cb) + ",0)";
       sqls.push_back(sql);
     }
 

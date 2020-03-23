@@ -9,7 +9,7 @@ include_directories(./include)
 
 aux_source_directory(./src DIR_SRCS)
 
-set(link_lib curl pthread mysqlclient event boost_system boost_program_options glog)
+set(link_lib curl mysqlclient event boost_system boost_program_options glog)
 
 add_executable(sp_fch ${DIR_SRCS})
 

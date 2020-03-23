@@ -92,7 +92,7 @@ bool DBMysql::BatchExecSql(const std::vector<std::string> &vect_sql)
     return true;
 }
 
-bool DBMysql::GetDataAsJson(const std::string& select_sql, JsonDataFormat* json_data_format ,json& json_data)
+bool DBMysql::GetDataAsJson(const std::string& select_sql, JsonDataFormat* json_data_format, json& json_data)
 {
     if (json_data_format->column_size != json_data_format->map_column_type.size())
     {
@@ -112,7 +112,7 @@ bool DBMysql::GetDataAsJson(const std::string& select_sql, JsonDataFormat* json_
     MYSQL_RES *result = mysql_store_result(&mysql_);
     size_t num_rows = mysql_num_rows(result);
 
-    LOG(INFO) << "select  size:  " << num_rows ;
+    LOG(INFO) << "select size: " << num_rows;
 
     for (size_t i = 0; i < num_rows; ++i)
     {

@@ -27,3 +27,14 @@ CREATE TABLE `utxo` (
   PRIMARY KEY (`address`,`txid`),
   KEY `i_utxo` (`txid`,`vout`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `history` (
+  `txid` varchar(200) NOT NULL,
+  `height` bigint(20) NOT NULL,
+  `idx` int(11) NOT NULL,
+  `tx_size` bigint(20) NOT NULL,
+  `time` bigint(11) NOT NULL,
+  `vins` longtext NOT NULL,
+  `vouts` longtext NOT NULL,
+  PRIMARY KEY (`txid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
