@@ -102,7 +102,7 @@ std::string getSenderAddress(const Vin vin)
 //LOG(INFO) << "getSenderAddress: " << response;
     json json_response = json::parse(response);
     json json_result = json_response["result"];
-    json vout = json_result["vout"].at(vin.n);
+    json vout = json_result["vout"].at(vin.vout);
     res = vout["scriptPubKey"]["addresses"].at(0).get<std::string>();
     return res;
 }
@@ -134,63 +134,58 @@ bool Rpc::getTransaction(const std::string &hash, Tx &tx)
     tx.size = size;
     tx.time = time;
 
-    json j_vins = json::array();
     if (tx.index > 0) {
         json json_vin = json_result["vin"];
         Vin vin;
-	json j_vin;
         for (int i = 0; i < json_vin.size(); ++i) {
             vin.txid = json_vin.at(i)["txid"].get<std::string>();
-            vin.n = json_vin.at(i)["vout"].get<int>();
+            vin.vout = json_vin.at(i)["vout"].get<int>();
+	    vin.i = i;
             tx.vins.push_back(vin);
-	    j_vin["txid"] = vin.txid;
-	    j_vin["vout"] = vin.n;
-	    j_vins.push_back(j_vin);
         }
     }
-    tx.vins_json = j_vins.dump();
 
     json json_vout = json_result["vout"];
-    json j_vouts = json::array();
     Vout vout;
     for (int i = 0; i < json_vout.size(); ++i)
     {
-	json j_vout;
         double a = json_vout.at(i)["value"].get<double>();
         std::stringstream ss;
 	ss << std::setprecision(8) << a;
 	std::string amount = ss.str();
 	json j_script = json_vout.at(i)["scriptPubKey"];
+
+        vout.n = i;
 	if (a != 0) {
             std::string address = j_script["addresses"].at(0).get<std::string>();
- 	    vout.out = i;
 	    vout.address = address;
 	    vout.amount = amount;
-	    tx.vouts.push_back(vout);
-	    j_vout["address"] = address;
-	    j_vout["value"] = amount;
-	    j_vout["n"] = i;
+	    vout.data = "";
 	} else {
-	    if (tx.index > 0 || (tx.index == 0 && j_script.find("addresses") == j_script.end())) {
-		if (tx.index > 0) {
-                    tx.data = true;
-                    tx.sender = getSenderAddress(tx.vins.at(0));
-		}
+	    if (tx.index > 0) {
+                tx.data = true;
+                tx.sender = getSenderAddress(tx.vins.at(0));
 	        std::string text = json_vout.at(i)["scriptPubKey"]["hex"].get<std::string>();
 	        tx.text = text;
-	        j_vout["data"] = text;
-	        j_vout["value"] = "0";
-	        j_vout["n"] = i;
+	        vout.address = "";
+	        vout.amount = "0";
+	        vout.data = text;
 	    } else {
-                std::string address = json_vout.at(i)["scriptPubKey"]["addresses"].at(0).get<std::string>();
-	        j_vout["address"] = address;
-	        j_vout["value"] = amount;
-	        j_vout["n"] = i;
+		if (j_script.find("addresses") != j_script.end()) {
+                    std::string address = j_script["addresses"].at(0).get<std::string>();
+	            vout.address = address;
+	            vout.amount = "0";
+	            vout.data = "";
+		} else {
+	            std::string text = json_vout.at(i)["scriptPubKey"]["hex"].get<std::string>();
+	            vout.address = "";
+	            vout.amount = "0";
+	            vout.data = text;
+		}
 	    }
 	}
-        j_vouts.push_back(j_vout);
+	tx.vouts.push_back(vout);
     }
-    tx.vouts_json = j_vouts.dump();
 
     return true;
 }

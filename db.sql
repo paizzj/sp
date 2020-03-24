@@ -7,6 +7,8 @@ CREATE TABLE `block` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+INSERT INTO block (blockcount) VALUES (0);
+
 CREATE TABLE `tx` (
   `address` varchar(100) NOT NULL,
   `txid` varchar(200) NOT NULL,
@@ -32,9 +34,24 @@ CREATE TABLE `history` (
   `txid` varchar(200) NOT NULL,
   `height` bigint(20) NOT NULL,
   `idx` int(11) NOT NULL,
-  `tx_size` bigint(20) NOT NULL,
+  `tx_size` int(11) NOT NULL,
   `time` bigint(11) NOT NULL,
-  `vins` longtext NOT NULL,
-  `vouts` longtext NOT NULL,
   PRIMARY KEY (`txid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `vins` (
+  `txid` varchar(200) NOT NULL,
+  `i` int(11) NOT NULL,
+  `hash` varchar(200) NOT NULL,
+  `vout` int(11) NOT NULL,
+  PRIMARY KEY (`txid`,`i`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `vouts` (
+  `txid` varchar(200) NOT NULL,
+  `address` varchar(200) NOT NULL,
+  `n` int(11) NOT NULL,
+  `value` varchar(100) NOT NULL,
+  `data` longtext NOT NULL,
+  PRIMARY KEY (`txid`,`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

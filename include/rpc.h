@@ -6,14 +6,15 @@
 struct Vin
 {
     std::string txid;
-    int n;
+    int vout;
+    int i;
 };
 struct Vout
 {
     std::string address;
-    std::string script;
-    int out;
     std::string amount;
+    std::string data;
+    int n;
 };
 struct Tx
 {
@@ -27,8 +28,6 @@ struct Tx
     std::string text;
     std::vector<Vin> vins;
     std::vector<Vout> vouts;
-    std::string vins_json;
-    std::string vouts_json;
 };
 
 class Rpc

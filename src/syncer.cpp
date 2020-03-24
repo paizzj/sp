@@ -72,11 +72,10 @@ LOG(INFO) << "node_height = " << node_height;
 
     std::cout << "height = " << height << std::endl;
     std::cout << "node_height = " << node_height << std::endl;
-    std::cout << "txs.size = " << txs.size() << std::endl;
 LOG(INFO) << "height = " << height;
 LOG(INFO) << "node_height = " << node_height;
 
-    if (txs.size() > 19 || height >= node_height) {
+    if (txs.size() > 9 || height >= node_height) {
       if (!flushTxToDB(txs, height)) {
 	goto loop;
       }
@@ -100,9 +99,8 @@ bool CSyncer::flushTxToDB(std::vector<Tx>& txs, uint64_t height)
 
   for (int i = 0; i < txs.size(); ++i) {
     Tx tx = txs.at(i);
-    sql = "INSERT INTO history (txid,height,idx,tx_size,time,vins,vouts) VALUES (\"" + tx.txid + "\","
-        + std::to_string(tx.height) + "," + std::to_string(tx.index) + "," + std::to_string(tx.size)
-	+ "," + std::to_string(tx.time) + ",\'" + tx.vins_json + "\',\'" + tx.vouts_json + "\')";
+    sql = "INSERT INTO history (txid,height,idx,tx_size,time) VALUES (\"" + tx.txid + "\"," + std::to_string(tx.height)
+	+ "," + std::to_string(tx.index) + "," + std::to_string(tx.size) + "," + std::to_string(tx.time) + ")";
     sqls.push_back(sql);
 
     if (tx.data) {
@@ -114,19 +112,28 @@ bool CSyncer::flushTxToDB(std::vector<Tx>& txs, uint64_t height)
     for (int j = 0; j < tx.vouts.size(); ++j) {
       Vout vout = tx.vouts.at(j);
       int cb = tx.index > 0 ? 0 : 1;
-      sql = "INSERT INTO utxo (address,txid,vout,amount,height,coinbase,spent) VALUES (\""
-	  + vout.address + "\",\"" + tx.txid + "\"," + std::to_string(vout.out) + ",\"" + vout.amount + "\","
-          + std::to_string(tx.height) + "," + std::to_string(cb) + ",0)";
+      if (vout.data.empty() && vout.amount != "0") {
+          sql = "INSERT INTO utxo (address,txid,vout,amount,height,coinbase,spent) VALUES (\""
+	      + vout.address + "\",\"" + tx.txid + "\"," + std::to_string(vout.n) + ",\"" + vout.amount + "\","
+              + std::to_string(tx.height) + "," + std::to_string(cb) + ",0)";
+          sqls.push_back(sql);
+      }
+
+      sql = "INSERT INTO vouts (txid,address,n,value,data) VALUES (\"" + tx.txid + "\",\"" + vout.address + "\","
+          + std::to_string(vout.n) + ",\"" + vout.amount + "\",\""+ vout.data + "\")";
       sqls.push_back(sql);
     }
 
     for (int k = 0; k < tx.vins.size(); ++k) {
       Vin vin = tx.vins.at(k);
 //      sql = "UPDATE utxo SET spent=1 WHERE vout=" + std::to_string(vin.n) + " AND txid=\"" + vin.txid + "\"";
-      sql = "DELETE from utxo WHERE txid=\"" + vin.txid + "\" AND vout=" + std::to_string(vin.n);
+      sql = "DELETE from utxo WHERE txid=\"" + vin.txid + "\" AND vout=" + std::to_string(vin.vout);
+      sqls.push_back(sql);
+
+      sql = "INSERT INTO vins (txid,i,hash,vout) VALUES (\"" + tx.txid + "\"," + std::to_string(vin.i) + ",\""
+	  + vin.txid + "\"," + std::to_string(vin.vout) + ")";
       sqls.push_back(sql);
     }
-
   }		
 
   if (height > 0) {
@@ -136,7 +143,6 @@ bool CSyncer::flushTxToDB(std::vector<Tx>& txs, uint64_t height)
   if (sqls.size() == 0)
     return true;
 
-  std::cout << "sqls.size = " << sqls.size() << std::endl;
   return g_db_mysql->BatchExecSql(sqls);
 }
 
