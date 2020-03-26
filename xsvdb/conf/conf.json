@@ -1,0 +1,14 @@
+{
+	"logpath":"./log",
+	"daemon":false,
+	"nodeurl":"http:127.0.0.1:8332",
+	"auth":"dev:a",
+	"mysql":
+	{
+		"url":"127.0.0.1",
+		"user": "root",
+		"pass": "a",
+		"db": "xsvdb",
+		"port": 3306
+	}
+}
