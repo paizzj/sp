@@ -122,6 +122,20 @@ int main (int argc,char*argv[])
 	std::string log_path = s_json_conf["logpath"].get<std::string>();
 	assert(InitLog(log_path));
 	assert(OpenDB());
+	bool back_run = s_json_conf["daemon"].get<bool>();
+	if (back_run)
+	{
+		fprintf(stdout, "Bitcoin server starting\n");
+
+		// Daemonize
+		if (daemon(1, 0)) 
+		{ // don't chdir (1), do close FDs (0)
+			fprintf(stderr, "Error: daemon() failed: %s\n", strerror(errno));
+			return 0;
+		}
+
+	}
+	RunJob();
 	
 	return 0;
 }

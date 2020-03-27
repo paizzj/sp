@@ -14,7 +14,7 @@ static void ScanChain(int fd, short kind, void *ctx)
 {
 	LOG(INFO) << "scan block begin ";
     Syncer::instance().scanBlockChain(); 
-    SetTimeout("ScanChain", 10);
+    SetTimeout("ScanChain", 120);
 }
 
 static void ScanMempool(int fd, short kind, void *ctx)
@@ -78,10 +78,10 @@ void Syncer::appendTxVinVoutSql(const json& json_tx, const std::string& txid)
 			std::string sql_prefix = "INSERT INTO `voutaddress` (`txid`, `n`, `address`, `addresspos`, `value`) VALUES ";
 			n = json_vout["n"].get<int>();
 			value = json_vout["value"].get<double>();
-			for(int j = 0; j < json_vout["addresses"].size(); j++)
+			for(int j = 0; j < json_vout["scriptPubKey"]["addresses"].size(); j++)
 			{
 				std::string sql = sql_prefix + "('" + txid + "','" + std::to_string(n) + "','" + 
-								  json_vout["addresses"][j].get<std::string>() + "','" + std::to_string(value);
+								  json_vout["scriptPubKey"]["addresses"][j].get<std::string>() + "','" + std::to_string(j) + "','" + std::to_string(value) + "');";
 				vect_sql_.push_back(sql);
 			}	
 		}
@@ -117,7 +117,6 @@ void Syncer::scanBlockChain()
 		pre_height = json_data[0][0].get<uint64_t>();
 	}
 
-
 	uint64_t cur_height  = 0;
 	rpc_.getBlockCount(cur_height);
 	
@@ -129,7 +128,7 @@ void Syncer::scanBlockChain()
 	json json_tx;
 	std::vector<std::string> vect_txid;
 
-	for (uint64_t i = pre_height+1; i < cur_height; i++)
+	for (int i = pre_height + 1; i < cur_height; i++)
 	{
 		json_block.clear();
 		vect_txid.clear();
@@ -140,7 +139,7 @@ void Syncer::scanBlockChain()
 		{
 			json_tx.clear();
 
-			std::string sql = "INSERT INTO `chaintx` (`txid`, `height`) VALUES ('" + vect_txid[j] + "','" + std::to_string(i) + ");";
+			std::string sql = "INSERT INTO `chaintx` (`txid`, `height`) VALUES ('" + vect_txid[j] + "','" + std::to_string(i) + "');";
 			vect_sql_.push_back(sql);
 			rpc_.getRawTransaction(vect_txid[j], json_tx);
 			appendTxVinVoutSql(json_tx, vect_txid[j]);

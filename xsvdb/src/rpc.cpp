@@ -17,6 +17,8 @@ static bool CurlPost(const std::string& url, const json &json_post, const std::s
 	if (!json_response["error"].is_null())
 	{
 		LOG(ERROR) << response;
+		LOG(ERROR) << curl_params.data;
+		return false;
 	}
 	
 	
@@ -66,7 +68,7 @@ bool Rpc::getBlock(const uint64_t& height, json& json_block)
 
 	json_params.clear();
 	json_params.push_back(json_response["result"].get<std::string>());	
-    structRpc("getblockhash", json_params, json_post);
+    structRpc("getblock", json_params, json_post);
 	if ( !rpcNode(json_post, json_block) )
 	{
 		return false;
