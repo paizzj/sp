@@ -107,12 +107,19 @@ void Syncer::appendTxVinVoutSql(const json& json_tx, const std::string& txid)
 
 void Syncer::refreshDB()
 {
-	g_db_mysql->batchRefreshDB(vect_sql_);
-	vect_sql_.clear();
+	LOG(INFO) << "refresh DB begin" ;
+	LOG(INFO) << "SQL size: " << vect_sql_.size() ;
+	if (vect_sql_.size() > 0)
+	{
+		g_db_mysql->batchRefreshDB(vect_sql_);
+		vect_sql_.clear();
+	}	
+	LOG(INFO) << "refresh DB end" ;
 }
 
 void Syncer::scanBlockChain()
 {
+	//check height which is needed to upate
 	std::string sql = "select height from block order by height desc limit 1;";
 	std::map<int,DBMysql::DataType> map_col_type;
 	map_col_type[0] = DBMysql::INT;
@@ -132,11 +139,13 @@ void Syncer::scanBlockChain()
 	{
 		return ;
 	}
+
+	//refresh blockchain data to db
 	json json_block;
 	json json_tx;
 	std::vector<std::string> vect_txid;
 
-	for (int i = pre_height + 1; i < cur_height; i++)
+	for (int i = pre_height + 1; i <= cur_height; i++)
 	{
 		json_block.clear();
 		vect_txid.clear();
@@ -146,11 +155,19 @@ void Syncer::scanBlockChain()
 		for (uint j = 0; j < vect_txid.size(); j++)
 		{
 			json_tx.clear();
-
 			std::string sql = "INSERT INTO `chaintx` (`txid`, `height`) VALUES ('" + vect_txid[j] + "','" + std::to_string(i) + "');";
 			vect_sql_.push_back(sql);
-			rpc_.getRawTransaction(vect_txid[j], json_tx);
-			appendTxVinVoutSql(json_tx, vect_txid[j]);
+			if (map_mempool_tx_.find(vect_txid[j]) != map_mempool_tx_.end())
+			{
+				std::string sql_mempool = "DELETE FROM mempooltx WHERE txid = '" + vect_txid[j] + "';";
+				vect_sql_.push_back(sql_mempool);
+				map_mempool_tx_.erase(vect_txid[j]);
+			}
+			else
+			{
+				rpc_.getRawTransaction(vect_txid[j], json_tx);
+				appendTxVinVoutSql(json_tx, vect_txid[j]);
+			}			
 		}
 		refreshDB();
 	}
@@ -159,6 +176,21 @@ void Syncer::scanBlockChain()
 
 void Syncer::scanMempool()
 {
+	// init mempool tx to map_mempool_tx_ from db;
+	if (!init_mempool_)
+	{
+		std::string sql = "SELECT txid FROM mempooltx;";
+		std::map<int, DBMysql::DataType> col_type;
+		json json_data;
+		g_db_mysql->getData(sql, col_type, json_data);
+		for(uint i = 0; i < json_data.size(); i++)
+		{
+			map_mempool_tx_[json_data[0][i].get<std::string>()] = true;
+		}
+		init_mempool_ = true;
+	}
+
+	//update the mempool tx from calling rpc
 	uint64_t cur_height  = 0;
     rpc_.getBlockCount(cur_height);
 	json json_rawmempool;
@@ -168,6 +200,7 @@ void Syncer::scanMempool()
 	for (uint i = 0; i < vect_txid.size(); i++)
 	{
 		std::string sql = "INSERT INTO `mempooltx` (`txid`, `height`) VALUES ('" + vect_txid[i] + "','" + std::to_string(cur_height) + "');";
+		map_mempool_tx_[vect_txid[i]] = true;
 		vect_sql_.push_back(sql);
 		rpc_.getRawTransaction(vect_txid[i],json_tx);
 		appendTxVinVoutSql(json_tx, vect_txid[i]);	

@@ -10,7 +10,7 @@ class Syncer:public Task
 public:
     Syncer()
     {
-
+		init_mempool_ = false;
     }
 
     virtual ~Syncer()
@@ -46,6 +46,8 @@ protected:
     static Syncer single_;
 	Rpc rpc_;
 	std::vector<std::string> vect_sql_;
+	std::map<std::string, bool> map_mempool_tx_;
+	bool init_mempool_ = false;
 };
 
 
