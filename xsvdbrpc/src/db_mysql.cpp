@@ -1,7 +1,6 @@
 #include "db_mysql.h"
 #include <utility>
 #include <iostream>
-#include <glog/logging.h>
 DBMysql* g_db_mysql = new DBMysql();
 
 DBMysql::DBMysql()
@@ -33,7 +32,7 @@ bool DBMysql::openDB(const json& json_connect)
                             port, NULL, 0))
     {
         std::string error= mysql_error(&mysql_);
-		LOG(ERROR) << "open DB  FAIL: " <<error;
+		std::cout << "open DB  FAIL: " <<error;
         return false;
     }
 
@@ -46,8 +45,8 @@ void DBMysql::refreshDB(const std::string& sql)
     int ret = mysql_real_query(&mysql_, sql.c_str(), strlen(sql.c_str()));
     if (ret != 0 && mysql_errno(&mysql_) != 1062)
     {
-		LOG(ERROR) << "SQL fail: " << mysql_error(&mysql_);
-	    LOG(ERROR) << "exec sql failed" << sql ;
+		std::cout << "SQL fail: " << mysql_error(&mysql_);
+	    std::cout << "exec sql failed" << sql ;
     }
 
 }
@@ -58,14 +57,14 @@ bool DBMysql::getData(const std::string& sql,  std::map<int, DataType> col_type 
     int ret = mysql_real_query(&mysql_, sql.c_str(), strlen(sql.c_str()));
     if (ret != 0)
     {
-	    LOG(ERROR) << "exec sql: " << sql << " fail: " << mysql_errno(&mysql_) << " " << mysql_error(&mysql_);
+	    std::cout << "exec sql: " << sql << " fail: " << mysql_errno(&mysql_) << " " << mysql_error(&mysql_);
         return false;
     }
 
     MYSQL_RES *result = mysql_store_result(&mysql_);
     size_t num_rows = mysql_num_rows(result);
 
-    LOG(INFO) << "data size: " << num_rows;
+    std::cout << "data size: " << num_rows;
 	int col_size = col_type.size();
 
     for (size_t i = 0; i < num_rows; ++i)

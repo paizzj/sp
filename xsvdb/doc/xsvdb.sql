@@ -46,10 +46,18 @@ CREATE TABLE IF NOT EXISTS `voutaddress` (
 CREATE TABLE IF NOT EXISTS `voutret` (
   `txid` varchar(100) NOT NULL,
   `n` int(11) NOT NULL,
-  `data` longtext,
+  `data` VARCHAR(512) NOT NULL,
   PRIMARY KEY (`txid`,`n`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+CREATE TABLE IF NOT EXISTS `utxo` (
+  `txid` varchar(100) NOT NULL,
+  `n` int(11) NOT NULL,
+  `address` varchar(100) DEFAULT NULL,
+  `addresspos` int(11) NOT NULL,
+  `value` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`txid`,`n`,`addresspos`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;

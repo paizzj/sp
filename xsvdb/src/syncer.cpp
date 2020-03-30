@@ -45,6 +45,7 @@ void Syncer::appendTxVinVoutSql(const json& json_tx, const std::string& txid)
 	json json_vins = json_tx["result"]["vin"];
 	json json_vouts = json_tx["result"]["vout"];
 	std::string sql_vin  = "INSERT INTO `vin` (`txid`, `prevtxid`, `n`) VALUES ";
+	
 	bool vin = false;
 	json json_vin;
 	std::string prev_txid;
@@ -64,7 +65,9 @@ void Syncer::appendTxVinVoutSql(const json& json_tx, const std::string& txid)
 		}
 		
 		std::string sql = sql_vin + "('" + txid + "','" + prev_txid +"','" + std::to_string(n) +"');";
+		std::string sql_utxo = "DELETE FROM utxo where txid = '" + prev_txid + "'AND n = '" + std::to_string(n) + "';";
 		vect_sql_.push_back(sql);
+		vect_sql_.push_back(sql_utxo);
 	}
 
 	std::string address;
@@ -76,22 +79,27 @@ void Syncer::appendTxVinVoutSql(const json& json_tx, const std::string& txid)
 		if (json_vout["scriptPubKey"].find("addresses") != json_vout["scriptPubKey"].end())
 		{
 			std::string sql_prefix = "INSERT INTO `voutaddress` (`txid`, `n`, `address`, `addresspos`, `value`) VALUES ";
+			std::string sql_prefix_utxo = "INSERT INTO `utxo` (`txid`, `n`, `address`, `addresspos`, `value`) VALUES ";
 			n = json_vout["n"].get<int>();
 			value = json_vout["value"].get<double>();
 			for(int j = 0; j < json_vout["scriptPubKey"]["addresses"].size(); j++)
 			{
 				std::string sql = sql_prefix + "('" + txid + "','" + std::to_string(n) + "','" + 
 								  json_vout["scriptPubKey"]["addresses"][j].get<std::string>() + "','" + std::to_string(j) + "','" + std::to_string(value) + "');";
+				std::string sql_utxo = sql_prefix_utxo + "('" + txid + "','" + std::to_string(n) + "','" + 
+								  json_vout["scriptPubKey"]["addresses"][j].get<std::string>() + "','" + std::to_string(j) + "','" + std::to_string(value) + "');";
 				vect_sql_.push_back(sql);
+				vect_sql_.push_back(sql_utxo);
 			}	
 		}
 		else
 		{
 			n = json_vout["n"].get<int>();
 			std::string ret_data = json_vout["scriptPubKey"]["asm"].get<std::string>();
-			std::string sql = "INSERT INTO `voutret` (`txid`, `n`, `data`) VALUES ('" + 
-							  txid + "','" + std::to_string(n) + "','" + ret_data +"');";
+			std::string prefix = ret_data.substr(12, 400);
 
+			std::string sql = "INSERT INTO `voutret` (`txid`, `n`, `data`) VALUES ('" + 
+							  txid + "','" + std::to_string(n) + "','" + prefix  +"');";
 			vect_sql_.push_back(sql);
 		}
 	}
@@ -159,7 +167,7 @@ void Syncer::scanMempool()
 	std::vector<std::string> vect_txid = json_rawmempool["result"];
 	for (uint i = 0; i < vect_txid.size(); i++)
 	{
-		std::string sql = "INSERT INTO `mempooltx` (`txid`, `height`) VALUES ('" + vect_txid[i] + "','" + std::to_string(cur_height) + ");";
+		std::string sql = "INSERT INTO `mempooltx` (`txid`, `height`) VALUES ('" + vect_txid[i] + "','" + std::to_string(cur_height) + "');";
 		vect_sql_.push_back(sql);
 		rpc_.getRawTransaction(vect_txid[i],json_tx);
 		appendTxVinVoutSql(json_tx, vect_txid[i]);	
