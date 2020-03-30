@@ -42,7 +42,7 @@ json getutxo(const JSONRPCRequest& request)
 	 
 
 	json json_result;
-	std::string sql = "SELECT address, n, value FROM utxo WHERE address = '" + address + "';";
+	std::string sql = "SELECT txid, n, value FROM utxo WHERE address = '" + address + "';";
 	g_db_mysql->getData(sql, col_type, json_result);
 
 	return json_result;
