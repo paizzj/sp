@@ -19,6 +19,6 @@ set(job_src src/job/base.cpp
 
 set(link_lib curl mysqlclient event boost_system boost_filesystem boost_program_options glog)
 
-add_executable(xsvdb ${base_src} ${job_src})
+add_executable(dbxsv ${base_src} ${job_src})
 
-target_link_libraries(xsvdb ${link_lib})
+target_link_libraries(dbxsv ${link_lib})

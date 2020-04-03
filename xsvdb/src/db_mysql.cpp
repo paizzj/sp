@@ -76,7 +76,7 @@ bool DBMysql::getData(const std::string& sql,  std::map<int, DataType> col_type 
         for (size_t j = 0; j < col_size; j++)
         {
             std::string sql_data = row[j];
-            DataType type  = col_type[j];
+            DataType type  = col_type[j];	
             if ( INT == type )
             {
                 int real_data = std::stoi(sql_data);

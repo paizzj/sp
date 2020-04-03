@@ -181,11 +181,12 @@ void Syncer::scanMempool()
 	{
 		std::string sql = "SELECT txid FROM mempooltx;";
 		std::map<int, DBMysql::DataType> col_type;
+		col_type[0] = DBMysql::STRING;
 		json json_data;
 		g_db_mysql->getData(sql, col_type, json_data);
 		for(uint i = 0; i < json_data.size(); i++)
 		{
-			map_mempool_tx_[json_data[0][i].get<std::string>()] = true;
+			map_mempool_tx_[json_data[i][0].get<std::string>()] = true;
 		}
 		init_mempool_ = true;
 	}
