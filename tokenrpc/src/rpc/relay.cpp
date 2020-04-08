@@ -117,7 +117,7 @@ json sendtoken(const JSONRPCRequest& request)
     }
 	
  	std::string tokenId = request.params[0].get<std::string>();
-	json tokenSendInfo = request.params[1].get<std::string>();
+	json tokenSendInfo = request.params[1];
 	SendToken token;
 	token.strProtocol = "SLP";
 	token.chTokenType = 1;
