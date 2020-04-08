@@ -26,25 +26,33 @@ json downloadnote(const JSONRPCRequest& request)
 
 json getutxo(const JSONRPCRequest& request)
 {
-	if (request.fHelp || request.params.size() != 1) {
+	if (request.fHelp || request.params.size() < 1) {
 		throw std::runtime_error(
-				"\nArguments:\n"
-				"1. \"address\" (string) \n"
+				"\n Arguments:\n "
+				"1. \"address\" (string) \n "
+				"2. \"address\" (string) \n "
+				"......\n "	
+				"n. \"address\" (string) \n "
 				);
 	}
 	
-	std::string address = request.params[0].get<std::string>();
+	std::string address;
+	uint address_size = request.params.size();
 	
+
 	std::map<int, DBMysql::DataType> col_type;
 	col_type[0] = DBMysql::STRING;
 	col_type[1] = DBMysql::INT;
 	col_type[2] = DBMysql::DOUBLE;
-	 
-
 	json json_result;
-	std::string sql = "SELECT txid, n, value FROM utxo WHERE address = '" + address + "';";
-	g_db_mysql->getData(sql, col_type, json_result);
-
+	for (uint i = 0; i < address_size; ++i)
+	{
+		json json_data;
+		address = request.params[i].get<std::string>();
+		std::string sql = "SELECT txid, n, value FROM utxo WHERE address = '" + address + "';";
+		g_db_mysql->getData(sql, col_type, json_data);
+		json_result[address] = json_data;
+	}
 	return json_result;
 }
 
