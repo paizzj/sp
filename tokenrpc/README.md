@@ -1,3 +1,3 @@
 This is the api for explaining SLP token
 
-The detail of api goes to look "doc/api.md"
+The detail looks [api](https://github.com/SimbaBlock/sp/blob/master/tokenrpc/doc/api.md)
