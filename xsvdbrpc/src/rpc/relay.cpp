@@ -35,6 +35,15 @@ json getutxo(const JSONRPCRequest& request)
 				"n. \"address\" (string) \n "
 				);
 	}
+
+    json json_db;
+    json_db["db"] = "xsvdb";
+    json_db["user"] = "root";
+    json_db["pass"] = "root890*()";
+    json_db["url"] = "127.0.0.1";
+    json_db["port"] = 3306;
+    g_db_mysql->openDB(json_db);
+
 	
 	std::string address;
 	uint address_size = request.params.size();
@@ -43,7 +52,7 @@ json getutxo(const JSONRPCRequest& request)
 	std::map<int, DBMysql::DataType> col_type;
 	col_type[0] = DBMysql::STRING;
 	col_type[1] = DBMysql::INT;
-	col_type[2] = DBMysql::DOUBLE;
+	col_type[2] = DBMysql::STRING;
 	json json_result;
 	for (uint i = 0; i < address_size; ++i)
 	{
@@ -53,6 +62,8 @@ json getutxo(const JSONRPCRequest& request)
 		g_db_mysql->getData(sql, col_type, json_data);
 		json_result[address] = json_data;
 	}
+
+	g_db_mysql->closeDB();
 	return json_result;
 }
 

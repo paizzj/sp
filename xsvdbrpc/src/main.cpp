@@ -408,7 +408,7 @@ int main(int argc, char* argv[])
     gArgs.ParseParameters(argc, argv);
     try
     {
-		InitDB();
+		//InitDB();
         InitLogging();
         InitParameterInteraction();
         AppInitMain();
