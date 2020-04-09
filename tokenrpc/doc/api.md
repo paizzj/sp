@@ -6,13 +6,13 @@
 
 ## params:
 
-"1, "shortname" (string) "
-"2, "fullname" (string) "
-"3, "tokenurl" (string) " 
-"4, "whitePaperHash" (string) " 
-"5, "precision" (int) "
- "6, "batonvout" (int) "
- "7, "total" (int) "
+1, "shortname" (string)  
+2, "fullname" (string)  
+3, "tokenurl" (string)  
+4, "whitePaperHash" (string)  
+5, "precision" (int)  
+6, "batonvout" (int)  
+7, "total" (int)  
 
 ## example: 
 
@@ -30,10 +30,10 @@ curl --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method":  "creategenesi
 
 ## params: 
 
-"1, "tokenId" (string) " 
-"2, "precision" (int) " 
-"3, "tokenVout" (int) " 
-"4, "tokenMintTotal" (int) "
+1, "tokenId" (string)  
+2, "precision" (int)   
+3, "tokenVout" (int)  
+4, "tokenMintTotal" (int)  
 
 ## example: 
 
@@ -51,8 +51,8 @@ decodetoken
 
 ## params: 
 
-"1. "tokentype" (string) " 
-"2, "tokenhex" (string) "
+1, "tokentype" (string)   
+2, "tokenhex" (string)  
 
 ## example: 
 
@@ -70,8 +70,8 @@ sendtoken
 
 ## params: 
 
-"1. "tokenId" (string) " 
-"2, "tokenSendInfo" (array of array [precision, baton_vout, token_amount]) "
+1, "tokenId" (string)   
+2, "tokenSendInfo" (array of array [precision, baton_vout, token_amount]) 
 
 ## example: 
 
