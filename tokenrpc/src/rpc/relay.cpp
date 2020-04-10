@@ -96,9 +96,24 @@ json decodetoken(const JSONRPCRequest& request)
 		json_result["protocol"] = token.strProtocol;
 		json_result["type"] = token.strTokenType;
 		json_result["token_id"] = token.strTokenId;
+		json  json_transfers;
+
+		for (uint i = 0; i < token.vectPrecition.size(); i++)
+		{
+			json json_tmp;
+			json_tmp.push_back(token.vectPrecition[i]);
+			json_tmp.push_back(token.vectTokenOutput[i]);
+			json_tmp.push_back(token.vectTokenAmount[i]);
+			
+			json_transfers.push_back(json_tmp);
+			
+		}
+/*
 		json_result["precition"] = token.vectPrecition;
-		json_result["token_output"] = token.vectPrecition;
-		json_result["token_amount"] = token.vectTokenAmount;
+		json_result["token_output"] = token.vectTokenOutput;
+		json_result["token_amount"] = token.vectTokenAmount;*/
+
+		json_result["transfers"] = json_transfers;
 
 	}
 
