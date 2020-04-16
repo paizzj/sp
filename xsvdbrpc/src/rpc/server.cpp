@@ -21,7 +21,7 @@
 
 #include <memory> // for unique_ptr
 #include <unordered_map>
-
+json g_json_db;
 static bool fRPCRunning = false;
 static bool fRPCInWarmup = true;
 static std::string rpcWarmupStatus("RPC server started");

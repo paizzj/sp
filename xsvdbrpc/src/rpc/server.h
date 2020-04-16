@@ -16,7 +16,7 @@
 #include<json.hpp>
 
 static const unsigned int DEFAULT_RPC_SERIALIZE_VERSION = 1;
-
+extern json g_json_db;
 class CRPCCommand;
 
 namespace RPCServer

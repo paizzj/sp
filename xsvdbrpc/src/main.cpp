@@ -262,41 +262,6 @@ static bool LockDataDirectory(bool probeOnly)
     return true;
 }
 
-void sendTx()
-{
-	std::vector<std::string> vectTxFile = vectFileSendTx;
-	vectFileSendTx.clear();
-	std::cout <<  "send vect size: " << vectTxFile.size() << std::endl;
-	std::string sign_txhex;
-	for (int i = 0; i < vectTxFile.size(); i++)
-	{
-		std::ifstream tx_file(vectTxFile[i]);
-		if (!tx_file)
-		{
-			continue;
-		}
-
-		json json_tx;
-		
-		tx_file >> json_tx;
-		if(!json_tx.is_object())
-		{
-			tx_file.close();
-			continue;
-		}
-		tx_file.close();
-
-    	sign_txhex = json_tx["result"]["hex"].get<std::string>();
-
-		json json_params;
-		json_params.push_back(sign_txhex);
-
-		json json_ret = CallRPC("sendrawtransaction", json_params);
-
-	}
-
-}
-
 void InitDB()
 {
 	json json_db;
@@ -307,13 +272,12 @@ void InitDB()
 	json_db["port"] = 3306;
 	assert(g_db_mysql->openDB(json_db));
 }
+
 bool AppInitMain()
 {
 
     // Start the lightweight task scheduler thread
-	//scheduler.scheduleEvery(timeOut, 10000000);
 
-//	scheduler.scheduleEvery(sendTx, 120000);
     CScheduler::Function serviceLoop = boost::bind(&CScheduler::serviceQueue, &scheduler);
     threadGroup.create_thread(boost::bind(&TraceThread<CScheduler::Function>, "scheduler", serviceLoop));
 
@@ -404,8 +368,25 @@ void InitParameterInteraction()
 
 int main(int argc, char* argv[])
 {
-   
-    gArgs.ParseParameters(argc, argv);
+    if (argc != 2)
+    {
+        std::cout << "run conf.json" << std::endl;
+        exit(0);
+    }
+    else
+    {
+        std::string strFile(argv[1]);
+        std::ifstream jfile(strFile);
+        json json_conf;
+        jfile >> json_conf;
+        jfile.close();
+
+        g_rpc_port = json_conf["port"].get<int>();
+        g_json_db = json_conf["dbmysql"];
+
+    }
+
+    //gArgs.ParseParameters(argc, argv);
     try
     {
 		//InitDB();

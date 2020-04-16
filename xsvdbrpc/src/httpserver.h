@@ -18,6 +18,7 @@ struct event_base;
 class CService;
 class HTTPRequest;
 
+extern int g_rpc_port;
 /** Initialize HTTP server.
  * Call this before RegisterHTTPHandler or EventBase().
  */

@@ -37,7 +37,7 @@
 
 /** Maximum size of http request (request line + headers) */
 static const size_t MAX_HEADERS_SIZE = 8192;
-
+int g_rpc_port = 8666;
 /** HTTP request work item */
 class HTTPWorkItem final : public HTTPClosure
 {
@@ -290,7 +290,7 @@ static bool ThreadHTTP(struct event_base* base, struct evhttp* http)
 /** Bind HTTP server to specified addresses */
 static bool HTTPBindAddresses(struct evhttp* http)
 {
-    int defaultPort = 8666;//gArgs.GetArg("-rpcport", BaseParams().RPCPort());
+    int defaultPort = g_rpc_port;//8666;//gArgs.GetArg("-rpcport", BaseParams().RPCPort());
     std::vector<std::pair<std::string, uint16_t> > endpoints;
 
     // Determine what addresses to bind to

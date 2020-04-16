@@ -2,27 +2,8 @@
 #include <utilstrencodings.h>
 #include <rpc/register.h>
 #include "db_mysql.h"
-
+#include <iostream>
 std::vector<std::string> vectFileSendTx;
-
-json downloadnote(const JSONRPCRequest& request)
-{
-	if (request.fHelp || request.params.size() != 1) {
-		throw std::runtime_error(
-				"\nArguments:\n"
-				"1. \"file name\" (string)  The name of file from downloading success\n"
-				);
-	}
-
-	std::string file_name = request.params[0].get<std::string>();
-
-	json json_result;
-	json_result["name"] = file_name;
-    json_result["status"] = true;
-	vectFileSendTx.push_back(file_name);
-
-    return json_result;
-}
 
 json getutxo(const JSONRPCRequest& request)
 {
@@ -35,19 +16,10 @@ json getutxo(const JSONRPCRequest& request)
 				"n. \"address\" (string) \n "
 				);
 	}
-
-    json json_db;
-    json_db["db"] = "xsvdb";
-    json_db["user"] = "root";
-    json_db["pass"] = "root890*()";
-    json_db["url"] = "127.0.0.1";
-    json_db["port"] = 3306;
-    g_db_mysql->openDB(json_db);
-
+    g_db_mysql->openDB(g_json_db);
 	
 	std::string address;
 	uint address_size = request.params.size();
-	
 
 	std::map<int, DBMysql::DataType> col_type;
 	col_type[0] = DBMysql::STRING;
@@ -67,14 +39,9 @@ json getutxo(const JSONRPCRequest& request)
 	return json_result;
 }
 
-
-
-
-
 static const CRPCCommand commands[] =
 { //  category              name                      actor (function)         argNames
     //  --------------------- ------------------------  -----------------------  ----------
-    { "relay",            "downloadnote",           &downloadnote,           {} },
     { "relay",            "getutxo",           		&getutxo,           	 {} },
 };
 
