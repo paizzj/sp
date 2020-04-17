@@ -8,5 +8,5 @@ sudo apt install mysql-server mysql-client libmysqlclient-dev
 
 ## Build   
 git clone https://github.com/SimbaBlock/sp.git  
-cd sp && mkdir build && cd build   
+cd sp/xsvsigndb && mkdir build && cd build   
 cmake .. && make  
