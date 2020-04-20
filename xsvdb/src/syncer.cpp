@@ -1,6 +1,7 @@
 #include "syncer.h"
 #include <glog/logging.h>
 #include "db_mysql.h"
+#include <sstream>
 
 static void SetTimeout(const std::string& name, int second)
 {
@@ -9,6 +10,15 @@ static void SetTimeout(const std::string& name, int second)
     timeout.tv_usec = 0;
     evtimer_add(Job::map_name_event_[name], &timeout);
 }
+
+static std::string FormatDouble(const double& value)
+{
+	std::stringstream ss;
+	ss << std::setprecision(12) << value;
+	std::string str = ss.str();  
+	return str;
+}
+
 
 static void ScanChain(int fd, short kind, void *ctx)
 {
@@ -85,9 +95,9 @@ void Syncer::appendTxVinVoutSql(const json& json_tx, const std::string& txid)
 			for(int j = 0; j < json_vout["scriptPubKey"]["addresses"].size(); j++)
 			{
 				std::string sql = sql_prefix + "('" + txid + "','" + std::to_string(n) + "','" + 
-								  json_vout["scriptPubKey"]["addresses"][j].get<std::string>() + "','" + std::to_string(j) + "','" + std::to_string(value) + "');";
+								  json_vout["scriptPubKey"]["addresses"][j].get<std::string>() + "','" + std::to_string(j) + "','" + FormatDouble(value) + "');";
 				std::string sql_utxo = sql_prefix_utxo + "('" + txid + "','" + std::to_string(n) + "','" + 
-								  json_vout["scriptPubKey"]["addresses"][j].get<std::string>() + "','" + std::to_string(j) + "','" + std::to_string(value) + "');";
+								  json_vout["scriptPubKey"]["addresses"][j].get<std::string>() + "','" + std::to_string(j) + "','" + FormatDouble(value) + "');";
 				vect_sql_.push_back(sql);
 				vect_sql_.push_back(sql_utxo);
 			}	
