@@ -10,10 +10,10 @@ json getutxo(const JSONRPCRequest& request)
 	if (request.fHelp || request.params.size() < 1) {
 		throw std::runtime_error(
 				"\n Arguments:\n "
-				"1. \"address\" (string) \n "
-				"2. \"address\" (string) \n "
+				"1. [\"address\",\"amount\"] \n "
+				"2. [\"address\",\"amount\"] \n "
 				"......\n "	
-				"n. \"address\" (string) \n "
+				"n. [\"address\", \"amount\"] \n "
 				);
 	}
     g_db_mysql->openDB(g_json_db);
@@ -29,10 +29,26 @@ json getutxo(const JSONRPCRequest& request)
 	for (uint i = 0; i < address_size; ++i)
 	{
 		json json_data;
-		address = request.params[i].get<std::string>();
+
+		json json_address_amount = request.params[i];
+		std::string address = json_address_amount[0].get<std::string>();
+		double amount = json_address_amount[1].get<double>();
 		std::string sql = "SELECT txid, n, value FROM utxo WHERE address = '" + address + "';";
 		g_db_mysql->getData(sql, col_type, json_data);
-		json_result[address] = json_data;
+		
+		json json_amount;
+		double tmp = 0.0;
+		for (uint j = 0; j < json_data.size(); j++)
+		{
+			tmp += std::atof(json_data[j][2].get<std::string>().c_str());
+			json_amount.push_back(json_data[j]);
+			if (tmp >= amount)
+			{
+				json_result[address] = json_amount;
+				break;
+			}
+
+		}
 	}
 
 	g_db_mysql->closeDB();

@@ -6,14 +6,14 @@
 
 ## params:
 
-1, "address" (string)  
-2, "address" (string)  
+1, ["address","amount"]
+2, ["address","amount"]
    ......  
-n, "address" (int)  
+n, ["address","amount"]
 
 ## example: 
 
-curl --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getutxo", "params": ["1A9eutkvZoQdNVevWGMbxwYNyQ5xtErjrc"] }' -H 'content-type: text/plain;' http://127.0.0.1:8888/
+curl --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getutxo", "params": [["1A9eutkvZoQdNVevWGMbxwYNyQ5xtErjrc",0.000015]] }' -H 'content-type: text/plain;' http://127.0.0.1:8666/
 
 ## result:
 
