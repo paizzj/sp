@@ -38,6 +38,12 @@ json getutxo(const JSONRPCRequest& request)
 		
 		json json_amount;
 		double tmp = 0.0;
+		if (amount < 0)
+		{
+			json_result[address] = json_data;
+			continue;
+		}
+
 		for (uint j = 0; j < json_data.size(); j++)
 		{
 			tmp += std::atof(json_data[j][2].get<std::string>().c_str());
