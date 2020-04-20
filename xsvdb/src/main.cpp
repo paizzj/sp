@@ -11,49 +11,49 @@ static json s_json_conf;
 
 static bool ParseCmd(int argc,char*argv[])
 {
-    using namespace boost::program_options;
-    std::string conf_file ;
+	using namespace boost::program_options;
+	std::string conf_file ;
 
-    boost::program_options::options_description opts_desc("All options");
-    opts_desc.add_options()
-            ("help,h", "help info")
-            ("configure,c", value<std::string>(&conf_file)->default_value("../conf/conf.json"), "configure file");
+	boost::program_options::options_description opts_desc("All options");
+	opts_desc.add_options()
+		("help,h", "run ./xsvdb -c [configure file]")
+		("configure,c", value<std::string>(&conf_file)->default_value("../conf/conf.json"));
 
-    variables_map cmd_param_map;
-    try
-    {
-        store(parse_command_line(argc, argv, opts_desc), cmd_param_map);
-    }
-    catch(boost::program_options::error_with_no_option_name &ex)
-    {
-        std::cerr << ex.what() << std::endl;
-    }
-    notify(cmd_param_map);
+	variables_map cmd_param_map;
+	try
+	{
+		store(parse_command_line(argc, argv, opts_desc), cmd_param_map);
+	}
+	catch(boost::program_options::error_with_no_option_name &ex)
+	{
+		std::cerr << ex.what() << std::endl;
+	}
+	notify(cmd_param_map);
 
-    if (cmd_param_map.count("help"))
-    {
-        std::cout << opts_desc << std::endl;
-        return false;
-    }
- 	std::ifstream jfile(conf_file);
+	if (cmd_param_map.count("help") || argc != 3)
+	{
+		std::cout << opts_desc << std::endl;
+		return false;
+	}
+	std::ifstream jfile(conf_file);
 
-    if (!jfile)
-    {
+	if (!jfile)
+	{
 		std::cerr << "No " <<conf_file <<" such config file!\n";
-        return false;
-    }
+		return false;
+	}
 
-    jfile >> s_json_conf;
-    if(!s_json_conf.is_object())
-    {
+	jfile >> s_json_conf;
+	if(!s_json_conf.is_object())
+	{
 		std::cerr << conf_file  <<   "is not json object!\n";
-        jfile.close();
-        return false;
-    }
-   
-    jfile.close();
+		jfile.close();
+		return false;
+	}
 
-    return true;
+	jfile.close();
+
+	return true;
 }
 
 static bool InitLog(const std::string& log_path)
@@ -118,7 +118,11 @@ static void RunJob()
 
 int main (int argc,char*argv[])
 {
-	assert(ParseCmd(argc,argv));
+	//assert(ParseCmd(argc,argv));
+	if (!ParseCmd(argc, argv))
+	{
+		exit(0);
+	}
 	std::string log_path = s_json_conf["logpath"].get<std::string>();
 	assert(InitLog(log_path));
 	assert(OpenDB());

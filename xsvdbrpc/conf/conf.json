@@ -4,7 +4,7 @@
 	{
 		"url":"127.0.0.1",
 		"user": "root",
-		"pass": "root",
+		"pass": "password",
 		"db": "xsvdb",
 		"port": 3306
 	}

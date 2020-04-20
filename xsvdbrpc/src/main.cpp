@@ -370,13 +370,25 @@ int main(int argc, char* argv[])
 {
     if (argc != 2)
     {
-        std::cout << "run conf.json" << std::endl;
+        std::cout << "run ./xsvdbrpc [configure file]" << std::endl;
         exit(0);
     }
     else
     {
         std::string strFile(argv[1]);
+				if(strFile == "-h" || strFile == "--help")
+				{
+					std::cout << "run ./xsvdbrpc [configure file]" << std::endl;
+					exit(0);
+				}
+
         std::ifstream jfile(strFile);
+				if (!jfile)
+				{
+					std::cout << "not " << strFile << " configure json file" <<std::endl;
+					std::cout << "run ./xsvdbrpc [configure file]" << std::endl;
+					exit(0);
+				}
         json json_conf;
         jfile >> json_conf;
         jfile.close();

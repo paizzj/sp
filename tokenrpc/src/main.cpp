@@ -262,51 +262,6 @@ static bool LockDataDirectory(bool probeOnly)
     return true;
 }
 
-void sendTx()
-{
-	std::vector<std::string> vectTxFile = vectFileSendTx;
-	vectFileSendTx.clear();
-	std::cout <<  "send vect size: " << vectTxFile.size() << std::endl;
-	std::string sign_txhex;
-	for (int i = 0; i < vectTxFile.size(); i++)
-	{
-		std::ifstream tx_file(vectTxFile[i]);
-		if (!tx_file)
-		{
-			continue;
-		}
-
-		json json_tx;
-		
-		tx_file >> json_tx;
-		if(!json_tx.is_object())
-		{
-			tx_file.close();
-			continue;
-		}
-		tx_file.close();
-
-    	sign_txhex = json_tx["result"]["hex"].get<std::string>();
-
-		json json_params;
-		json_params.push_back(sign_txhex);
-
-		json json_ret = CallRPC("sendrawtransaction", json_params);
-
-	}
-
-}
-
-void InitDB()
-{
-	json json_db;
-	json_db["db"] = "xsvdb";
-	json_db["user"] = "root";
-	json_db["pass"] = "root890*()";
-	json_db["url"] = "127.0.0.1";
-	json_db["port"] = 3306;
-	assert(g_db_mysql->openDB(json_db));
-}
 bool AppInitMain()
 {
 
@@ -408,7 +363,6 @@ int main(int argc, char* argv[])
     gArgs.ParseParameters(argc, argv);
     try
     {
-		//InitDB();
         InitLogging();
         InitParameterInteraction();
         AppInitMain();
