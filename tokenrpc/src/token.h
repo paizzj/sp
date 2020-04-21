@@ -12,7 +12,7 @@ public:
 	std::string strShortName;
 	std::string strFullName;
 	std::string strTokenUrl;
-	std::string strWhitePaperHash;
+	uint256 strWhitePaperHash;
 	uint8_t chPrecision;
 	uint8_t chBatonVout;
 	uint64_t nTotal;
@@ -65,7 +65,7 @@ public:
 	std::string strProtocol;
 	uint8_t chTokenType;
 	std::string strTokenType;
-	std::string strTokenId;
+	uint256 strTokenId;
 	uint8_t chPrecision;
 	uint8_t chBatonVout;
 	uint64_t nMintTotal;
@@ -114,7 +114,7 @@ public:
 	std::string strProtocol;
 	uint8_t chTokenType;
 	std::string strTokenType;
-	std::string strTokenId;
+	uint256 strTokenId;
 	std::vector<uint8_t> vectPrecition;
 	std::vector<uint8_t> vectTokenOutput;
 	std::vector<uint64_t> vectTokenAmount;
@@ -139,9 +139,9 @@ public:
         READWRITE(chTokenType);
         READWRITE(strTokenType);
         READWRITE(strTokenId);
-		READWRITE(vectPrecition);
-		READWRITE(vectTokenOutput);
-		READWRITE(vectTokenAmount);
+		    READWRITE(vectPrecition);
+		    READWRITE(vectTokenOutput);
+		    READWRITE(vectTokenAmount);
 		
       }
 

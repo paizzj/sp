@@ -24,12 +24,12 @@ json creategenesistoken(const JSONRPCRequest& request)
 	
 	GenesisToken  token;
 	token.strProtocol = "SLP";
-    token.strTokenType = "GENESISE";
-	token.chTokenType = 00;
+    token.strTokenType = "GENESIS";
+	token.chTokenType = 01;
     token.strShortName = request.params[0].get<std::string>();
     token.strFullName = request.params[1].get<std::string>();
     token.strTokenUrl = request.params[2].get<std::string>();
-    token.strWhitePaperHash = request.params[3].get<std::string>();
+    token.strWhitePaperHash = uint256S(request.params[3].get<std::string>());
    	token.chPrecision  = request.params[4].get<int>();
     token.chBatonVout = request.params[5].get<int>();
     token.nTotal = request.params[6].get<uint64_t>();
@@ -68,7 +68,7 @@ json decodetoken(const JSONRPCRequest& request)
 		json_result["short_name"] = token.strShortName;
 		json_result["full_name"] = token.strFullName;
 		json_result["token_url"] = token.strTokenUrl;
-		json_result["hash"] = token.strWhitePaperHash;
+		json_result["hash"] = token.strWhitePaperHash.GetHex();
 		json_result["precision"] = token.chPrecision;
 		json_result["baton_vout"] = token.chBatonVout;
 		json_result["total"] = token.nTotal;
@@ -82,7 +82,7 @@ json decodetoken(const JSONRPCRequest& request)
         ssToken >> token;
 		json_result["protocol"] = token.strProtocol;
 		json_result["type"] = token.strTokenType;
-		json_result["token_id"] = token.strTokenId;
+		json_result["token_id"] = token.strTokenId.GetHex();;
 		json_result["baton_vout"] = token.chBatonVout;
 		json_result["mint_total"] = token.nMintTotal;
 	
@@ -95,7 +95,7 @@ json decodetoken(const JSONRPCRequest& request)
         ssToken >> token;
 		json_result["protocol"] = token.strProtocol;
 		json_result["type"] = token.strTokenType;
-		json_result["token_id"] = token.strTokenId;
+		json_result["token_id"] = token.strTokenId.GetHex();
 		json  json_transfers;
 
 		for (uint i = 0; i < token.vectPrecition.size(); i++)
@@ -137,7 +137,7 @@ json sendtoken(const JSONRPCRequest& request)
 	token.strProtocol = "SLP";
 	token.chTokenType = 1;
 	token.strTokenType = "send";
-	token.strTokenId = tokenId;
+	token.strTokenId =uint256S(tokenId);
 
 	for(uint i =0; i < tokenSendInfo.size(); i++)
 	{
@@ -175,9 +175,9 @@ json minttoken(const JSONRPCRequest& request)
 	uint64_t nMintTotal = request.params[3].get<uint64_t>();
 	MintToken token;
 	token.strProtocol = "SLP";
-	token.chTokenType = 2;
+	token.chTokenType = 1;
 	token.strTokenType = "mint";
-	token.strTokenId = tokenId;
+	token.strTokenId = uint256S(tokenId);
 	token.nMintTotal = nMintTotal;
 	token.chBatonVout = chBatonVout;	
 	token.chPrecision = chPrecision;	
