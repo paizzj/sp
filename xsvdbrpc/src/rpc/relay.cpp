@@ -61,10 +61,49 @@ json getutxo(const JSONRPCRequest& request)
 	return json_result;
 }
 
+json gettxidutxo(const JSONRPCRequest& request)
+{
+	if (request.fHelp || request.params.size() < 1) {
+		throw std::runtime_error(
+				"\n Arguments:\n "
+				"1. [\"address\",\"txid\"] \n "
+				"2. [\"address\",\"txid\"] \n "
+				"......\n "	
+				"n. [\"address\", \"txid\"] \n "
+				);
+	}
+    g_db_mysql->openDB(g_json_db);
+	
+	std::string address;
+	uint address_size = request.params.size();
+
+	std::map<int, DBMysql::DataType> col_type;
+	col_type[0] = DBMysql::STRING;
+	col_type[1] = DBMysql::INT;
+	col_type[2] = DBMysql::STRING;
+	json json_result;
+	for (uint i = 0; i < address_size; ++i)
+	{
+		json json_data;
+
+		json json_address_txid = request.params[i];
+		std::string address = json_address_txid[0].get<std::string>();
+		std::string txid = json_address_txid[1].get<std::string>();
+		std::string sql = "SELECT txid, n, value FROM utxo WHERE address = '" + address + "',txid= '" + txid + "';";
+		g_db_mysql->getData(sql, col_type, json_data);
+		json_result[address] = json_data;
+
+	}
+	g_db_mysql->closeDB();
+	return json_result;
+}
+
+
 static const CRPCCommand commands[] =
 { //  category              name                      actor (function)         argNames
     //  --------------------- ------------------------  -----------------------  ----------
     { "relay",            "getutxo",           		&getutxo,           	 {} },
+    { "relay",            "gettxidutxo",          &gettxidutxo,          {} },
 };
 
 
