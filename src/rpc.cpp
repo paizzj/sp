@@ -147,12 +147,14 @@ bool Rpc::getTransaction(const std::string &hash, Tx &tx)
 
     json json_vout = json_result["vout"];
     Vout vout;
+    LOG(INFO) << "txid = " << tx.txid;
     for (int i = 0; i < json_vout.size(); ++i)
     {
         double a = json_vout.at(i)["value"].get<double>();
         std::stringstream ss;
-	ss << std::setprecision(8) << a;
+	ss << std::setprecision(15) << a;
 	std::string amount = ss.str();
+        LOG(INFO) << "amount = " << amount;
 	json j_script = json_vout.at(i)["scriptPubKey"];
 
         vout.n = i;

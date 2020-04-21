@@ -53,5 +53,5 @@ CREATE TABLE `vouts` (
   `n` int(11) NOT NULL,
   `value` varchar(100) NOT NULL,
   `data` longtext NOT NULL,
-  PRIMARY KEY (`txid`,`address`)
+  PRIMARY KEY (`txid`,`n`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
