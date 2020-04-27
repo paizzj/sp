@@ -1,6 +1,7 @@
 #include "syncer.h"
 #include <glog/logging.h>
 #include "db_mysql.h"
+#include "picosha2.h"
 #include <sstream>
 
 static void SetTimeout(const std::string& name, int second)
@@ -19,6 +20,12 @@ static std::string FormatDouble(const double& value)
 	return str;
 }
 
+static std::string sha(const std::string str)
+{
+    std::string hash;
+    picosha2::hash256_hex_string(str, hash);
+    return hash;
+}
 
 static void ScanChain(int fd, short kind, void *ctx)
 {
@@ -76,8 +83,10 @@ void Syncer::appendTxVinVoutSql(const json& json_tx, const std::string& txid)
 		
 		std::string sql = sql_vin + "('" + txid + "','" + prev_txid +"','" + std::to_string(n) +"');";
 		std::string sql_utxo = "DELETE FROM utxo where txid = '" + prev_txid + "'AND n = '" + std::to_string(n) + "';";
+		std::string sql_token = "DELETE FROM utxo_token where txid = '" + prev_txid + "'AND n = '" + std::to_string(n) + "';";
 		vect_sql_.push_back(sql);
 		vect_sql_.push_back(sql_utxo);
+		vect_sql_.push_back(sql_token);
 	}
 
 	std::string address;
@@ -104,13 +113,28 @@ void Syncer::appendTxVinVoutSql(const json& json_tx, const std::string& txid)
 		}
 		else
 		{
+            value = json_vout["value"].get<double>();
 			n = json_vout["n"].get<int>();
-			std::string ret_data = json_vout["scriptPubKey"]["asm"].get<std::string>();
-			std::string prefix = ret_data.substr(12, 400);
+            if (value == 0) {
+			    std::string ret_data = json_vout["scriptPubKey"]["hex"].get<std::string>();
+			    std::string prefix = ret_data.substr(4, 400);
 
-			std::string sql = "INSERT INTO `voutret` (`txid`, `n`, `data`) VALUES ('" + 
+			    std::string sql = "INSERT INTO `voutret` (`txid`, `n`, `data`) VALUES ('" +
 							  txid + "','" + std::to_string(n) + "','" + prefix  +"');";
-			vect_sql_.push_back(sql);
+			    vect_sql_.push_back(sql);
+            } else {
+                std::string script = json_vout["scriptPubKey"]["hex"].get<std::string>();
+                std::string pk = "";
+                if (script.substr(0, 6) == "76a914") {
+                    pk = script.substr(6, 40);
+                }
+			    std::string sql = "INSERT INTO `slppp` (`txid`, `n`, `address`, `script`, `hash`) VALUES ('" +
+							  txid + "','" + std::to_string(n) + "','" + pk + "','" + script + "','" + sha(script) + "');";
+			    std::string sql_token = "INSERT INTO `utxo_token` (`txid`, `n`, `address`, `value`) VALUES ('" +
+							  txid + "','" + std::to_string(n) + "','" + pk + "','" + FormatDouble(value) + "');";
+			    vect_sql_.push_back(sql);
+			    vect_sql_.push_back(sql_token);
+            }
 		}
 	}
 }
@@ -118,7 +142,7 @@ void Syncer::appendTxVinVoutSql(const json& json_tx, const std::string& txid)
 void Syncer::refreshDB()
 {
 	LOG(INFO) << "refresh DB begin" ;
-	LOG(INFO) << "SQL size: " << vect_sql_.size() ;
+    LOG(INFO) << "SQL size: " << vect_sql_.size() ;
 	if (vect_sql_.size() > 0)
 	{
 		g_db_mysql->batchRefreshDB(vect_sql_);

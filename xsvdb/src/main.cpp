@@ -129,7 +129,7 @@ int main (int argc,char*argv[])
 	bool back_run = s_json_conf["daemon"].get<bool>();
 	if (back_run)
 	{
-		fprintf(stdout, "Bitcoin server starting\n");
+		fprintf(stdout, "server starting\n");
 
 		// Daemonize
 		if (daemon(1, 0)) 
