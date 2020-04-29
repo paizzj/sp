@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS `utxo_token` (
   `n` int(11) NOT NULL,
   `address` varchar(200) DEFAULT NULL,
   `value` varchar(100) DEFAULT NULL,
+  `script` text DEFAULT NULL,
   PRIMARY KEY (`txid`,`n`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

@@ -130,8 +130,8 @@ void Syncer::appendTxVinVoutSql(const json& json_tx, const std::string& txid)
                 }
 			    std::string sql = "INSERT INTO `slppp` (`txid`, `n`, `address`, `script`, `hash`) VALUES ('" +
 							  txid + "','" + std::to_string(n) + "','" + pk + "','" + script + "','" + sha(script) + "');";
-			    std::string sql_token = "INSERT INTO `utxo_token` (`txid`, `n`, `address`, `value`) VALUES ('" +
-							  txid + "','" + std::to_string(n) + "','" + pk + "','" + FormatDouble(value) + "');";
+			    std::string sql_token = "INSERT INTO `utxo_token` (`txid`, `n`, `address`, `value`, `script`) VALUES ('" +
+							  txid + "','" + std::to_string(n) + "','" + pk + "','" + FormatDouble(value) + "','" + script + "');";
 			    vect_sql_.push_back(sql);
 			    vect_sql_.push_back(sql_token);
             }
