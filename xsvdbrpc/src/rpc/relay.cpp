@@ -98,12 +98,38 @@ json gettxidutxo(const JSONRPCRequest& request)
 	return json_result;
 }
 
+json gettokenutxo(const JSONRPCRequest& request)
+{
+	if (request.fHelp || request.params.size() < 1) {
+		throw std::runtime_error(
+				"\n Arguments:\n "
+				"1. \"pubkey\" \n "
+				);
+	}
+    g_db_mysql->openDB(g_json_db);
+
+	std::string address = request.params[0].get<std::string>();
+	std::map<int, DBMysql::DataType> col_type;
+	col_type[0] = DBMysql::STRING;
+	col_type[1] = DBMysql::INT;
+	col_type[2] = DBMysql::STRING;
+	col_type[3] = DBMysql::STRING;
+
+	json json_data;
+
+	std::string sql = "SELECT txid, n, value, script FROM utxo_token WHERE address = '" + address + "';";
+	g_db_mysql->getData(sql, col_type, json_data);
+
+	g_db_mysql->closeDB();
+	return json_data;
+}
 
 static const CRPCCommand commands[] =
 { //  category              name                      actor (function)         argNames
     //  --------------------- ------------------------  -----------------------  ----------
     { "relay",            "getutxo",           		&getutxo,           	 {} },
-    { "relay",            "gettxidutxo",          &gettxidutxo,          {} },
+    { "relay",            "gettxidutxo",            &gettxidutxo,            {} },
+    { "relay",            "gettokenutxo",           &gettokenutxo,           {} },
 };
 
 
