@@ -7,6 +7,6 @@ scan blockchian and write data(utxo, outputscript etc.) into mysql.
 rpc service.
 
 # build
-[depend](https://github.com/SimbaBlock/sp/blob/master/build.md)
+[dependency](https://github.com/SimbaBlock/sp/blob/master/build.md)
 
 
