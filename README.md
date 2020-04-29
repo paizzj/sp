@@ -1,7 +1,7 @@
 # SP
 
 ## xsvdb
-scan blockchian write data(utxo, outputscript etc.) into mysql.
+scan blockchian and write data(utxo, outputscript etc.) into mysql.
 
 ## xsvdbrpc
 rpc service.
