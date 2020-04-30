@@ -89,7 +89,7 @@ json gettxidutxo(const JSONRPCRequest& request)
 		json json_address_txid = request.params[i];
 		std::string address = json_address_txid[0].get<std::string>();
 		std::string txid = json_address_txid[1].get<std::string>();
-		std::string sql = "SELECT txid, n, value FROM utxo WHERE address = '" + address + "',txid= '" + txid + "';";
+		std::string sql = "SELECT txid, n, value FROM utxo WHERE address ='" + address + "'and txid='" + txid + "';";
 		g_db_mysql->getData(sql, col_type, json_data);
 		json_result[address] = json_data;
 
@@ -117,7 +117,7 @@ json gettokenutxo(const JSONRPCRequest& request)
 
 	json json_data;
 
-	std::string sql = "SELECT txid, n, value, script FROM utxo_token WHERE address = '" + address + "';";
+	std::string sql = "SELECT txid, n, value, script FROM utxo_token WHERE address = '" + address + "' and script>''";
 	g_db_mysql->getData(sql, col_type, json_data);
 
 	g_db_mysql->closeDB();

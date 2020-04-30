@@ -104,39 +104,44 @@ void Syncer::appendTxVinVoutSql(const json& json_tx, const std::string& txid)
 			for(int j = 0; j < json_vout["scriptPubKey"]["addresses"].size(); j++)
 			{
 				std::string sql = sql_prefix + "('" + txid + "','" + std::to_string(n) + "','" + 
-								  json_vout["scriptPubKey"]["addresses"][j].get<std::string>() + "','" + std::to_string(j) + "','" + FormatDouble(value) + "');";
+						  json_vout["scriptPubKey"]["addresses"][j].get<std::string>() + "','" + std::to_string(j) + "','" + FormatDouble(value) + "');";
 				std::string sql_utxo = sql_prefix_utxo + "('" + txid + "','" + std::to_string(n) + "','" + 
-								  json_vout["scriptPubKey"]["addresses"][j].get<std::string>() + "','" + std::to_string(j) + "','" + FormatDouble(value) + "');";
+						  json_vout["scriptPubKey"]["addresses"][j].get<std::string>() + "','" + std::to_string(j) + "','" + FormatDouble(value) + "');";
 				vect_sql_.push_back(sql);
 				vect_sql_.push_back(sql_utxo);
 			}	
 		}
 		else
 		{
-            value = json_vout["value"].get<double>();
+                        value = json_vout["value"].get<double>();
 			n = json_vout["n"].get<int>();
-            if (value == 0) {
+                        if (value == 0) {
 			    std::string ret_data = json_vout["scriptPubKey"]["hex"].get<std::string>();
 			    std::string prefix = ret_data.substr(4, 400);
 
 			    std::string sql = "INSERT INTO `voutret` (`txid`, `n`, `data`) VALUES ('" +
 							  txid + "','" + std::to_string(n) + "','" + prefix  +"');";
 			    vect_sql_.push_back(sql);
-            } else {
-                std::string script = json_vout["scriptPubKey"]["hex"].get<std::string>();
-                std::string pk = "";
-                if (script.substr(0, 6) == "76a914") {
-                    pk = script.substr(6, 40);
-                }
-			    std::string sql = "INSERT INTO `slppp` (`txid`, `n`, `address`, `script`, `hash`) VALUES ('" +
-							  txid + "','" + std::to_string(n) + "','" + pk + "','" + script + "','" + sha(script) + "');";
+                        } else {
+                            std::string script = json_vout["scriptPubKey"]["hex"].get<std::string>();
+                            std::string pk = "";
+                            if (script.substr(0, 6) == "76a914") {
+                                pk = script.substr(6, 40);
+                            }
+
+	                    LOG(INFO) << "txid: " << txid;
+	                    LOG(INFO) << "script: " << script;
 			    std::string sql_token = "INSERT INTO `utxo_token` (`txid`, `n`, `address`, `value`, `script`) VALUES ('" +
 							  txid + "','" + std::to_string(n) + "','" + pk + "','" + FormatDouble(value) + "','" + script + "');";
+			    std::string sql = "INSERT INTO `slppp` (`txid`, `n`, `address`, `script`, `hash`) VALUES ('" +
+							  txid + "','" + std::to_string(n) + "','" + pk + "','" + script + "','" + sha(script) + "');";
+	                    LOG(INFO) << "sql: " << sql;
+	                    LOG(INFO) << "sqlt: " << sql_token;
 			    vect_sql_.push_back(sql);
 			    vect_sql_.push_back(sql_token);
-            }
-		}
-	}
+                     }
+         }
+    }
 }
 
 void Syncer::refreshDB()
