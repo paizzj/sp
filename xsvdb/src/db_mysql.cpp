@@ -27,6 +27,8 @@ bool DBMysql::openDB(const json& json_connect)
 	int port = json_connect["port"].get<int>();
 	std::string db = json_connect["db"].get<std::string>();
 
+    char value = 1;
+    mysql_options(&mysql_, MYSQL_OPT_RECONNECT, (char *)&value);
 
     if (!mysql_real_connect(&mysql_, url.c_str(), user.c_str(),
                             pass.c_str(), db.c_str(),
