@@ -9,10 +9,15 @@ static bool CurlPost(const std::string& url, const json &json_post, const std::s
     CurlParams curl_params;
     curl_params.auth = auth;
     curl_params.url = url;
- // curl_params.content_type = "content-type:text/plain";
     curl_params.data = json_post.dump();
     std::string response;
-    CurlPostParams(curl_params,response);
+    bool res = CurlPostParams(curl_params,response);
+    if (!res)
+	{
+		LOG(ERROR) << "[CurlPost]: "<< response;
+		return false;
+    }
+
     json_response = json::parse(response);
 	if (!json_response["error"].is_null())
 	{
@@ -20,7 +25,6 @@ static bool CurlPost(const std::string& url, const json &json_post, const std::s
 		LOG(ERROR) << curl_params.data;
 		return false;
 	}
-	
 	
     return true;
 }
@@ -44,6 +48,7 @@ bool Rpc::getBlockCount(uint64_t& height)
     json json_response;	
     if ( !rpcNode(json_post, json_response) )
 	{
+		LOG(ERROR) << "[getBlockCount] error";
 		return false;
 	}
 	
@@ -62,6 +67,7 @@ bool Rpc::getBlock(const uint64_t& height, json& json_block)
     json json_response;	
     if ( !rpcNode(json_post, json_response) )
 	{
+		LOG(ERROR) << "[getBlock] error";
 		return false;
 	}
 
@@ -88,6 +94,7 @@ bool Rpc::getRawTransaction(const std::string& txid, json& json_tx)
     structRpc("getrawtransaction", json_params, json_post);
     if ( !rpcNode(json_post, json_tx) )
 	{
+		LOG(ERROR) << "[getRawTransaction] error";
 		return false;
 	}
 
@@ -103,6 +110,7 @@ bool Rpc::getRawMempool(json& json_rawmempool)
     structRpc("getrawmempool", json_params, json_post);
     if ( !rpcNode(json_post, json_rawmempool) )
 	{
+		LOG(ERROR) << "[getRawMempool] error";
 		return false;
 	}
 

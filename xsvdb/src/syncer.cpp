@@ -42,7 +42,6 @@ void Syncer::appendBlockSql(const json& json_block, const uint64_t& height, std:
 		vect_txid.push_back(json_block["result"]["tx"][i].get<std::string>());
 	}
 	std::string hash = json_block["result"]["hash"].get<std::string>();
-	//INSERT INTO `xsvdb`.`block` (`height`, `timestamps`) VALUES ('23', '123123');
 	std::string sql = "INSERT INTO `block` (`hash`, `height`, `timestamps`) VALUES ('" + hash +
 	   				  "','" + std::to_string(height) + "','" + std::to_string(timestamps) + "');";
 
@@ -128,12 +127,12 @@ void Syncer::scanBlockChain()
 	}
 
 	uint64_t cur_height  = 0;
-	rpc_.getBlockCount(cur_height);
+	bool res = rpc_.getBlockCount(cur_height);
+    if (!res)
+        return;
 	
 	if (cur_height <= pre_height)
-	{
-		return ;
-	}
+		return;
 
 	//refresh blockchain data to db
 	json json_block;
@@ -144,7 +143,10 @@ void Syncer::scanBlockChain()
 	{
 		json_block.clear();
 		vect_txid.clear();
-		rpc_.getBlock(i, json_block);
+		res = rpc_.getBlock(i, json_block);
+        if (!res)
+            return;
+
 		appendBlockSql(json_block, i, vect_txid);
 
 		for (uint j = 0; j < vect_txid.size(); j++)
@@ -160,7 +162,9 @@ void Syncer::scanBlockChain()
 			}
 			else
 			{
-				rpc_.getRawTransaction(vect_txid[j], json_tx);
+				res = rpc_.getRawTransaction(vect_txid[j], json_tx);
+                if (!res)
+                    return;
 				appendTxVinVoutSql(json_tx, vect_txid[j]);
 			}			
 		}
@@ -190,9 +194,15 @@ void Syncer::scanMempool()
 
 	//update the mempool tx from calling rpc
 	uint64_t cur_height  = 0;
-    rpc_.getBlockCount(cur_height);
+    bool res = rpc_.getBlockCount(cur_height);
+    if (!res)
+        return;
+
 	json json_rawmempool;
-	rpc_.getRawMempool(json_rawmempool);
+	res = rpc_.getRawMempool(json_rawmempool);
+    if (!res)
+        return;
+
 	json json_tx;
 	std::vector<std::string> vect_txid = json_rawmempool["result"];
 	for (uint i = 0; i < vect_txid.size(); i++)
@@ -200,7 +210,10 @@ void Syncer::scanMempool()
 		std::string sql = "INSERT INTO `mempooltx` (`txid`, `height`) VALUES ('" + vect_txid[i] + "','" + std::to_string(cur_height) + "');";
 		map_mempool_tx_[vect_txid[i]] = true;
 		vect_sql_.push_back(sql);
-		rpc_.getRawTransaction(vect_txid[i],json_tx);
+		res = rpc_.getRawTransaction(vect_txid[i],json_tx);
+        if (!res)
+            return;
+
 		appendTxVinVoutSql(json_tx, vect_txid[i]);	
 	}
 
