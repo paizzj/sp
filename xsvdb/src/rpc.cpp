@@ -31,7 +31,6 @@ bool Rpc::structRpc(const std::string& method, const json& json_params, json& js
     json_post["id"] = "curltest";
     json_post["method"] = method;
     json_post["params"] = json_params;
-	
     return true;
 }
 
@@ -114,10 +113,4 @@ bool Rpc::rpcNode(const json &json_post, json& json_response)
 {
     return CurlPost(node_url_,json_post,auth_, json_response);
 }
-
-
-
-
-
-
 

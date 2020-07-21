@@ -20,7 +20,6 @@ bool CurlPostParams(const CurlParams &params, std::string &response)
     CURLcode res;
     response.clear();
     std::string error_str ;
-    //error_str.clear();
     if (curl)
     {
         headers = curl_slist_append(headers, params.content_type.c_str());
@@ -49,7 +48,7 @@ bool CurlPostParams(const CurlParams &params, std::string &response)
     if (res != CURLE_OK)
     {
         error_str = curl_easy_strerror(res);
-		LOG(ERROR)<<"curl error: " <<error_str << std::endl;
+		LOG(ERROR) << "CurlPostParams: " << error_str << std::endl;
         return false;
     }
     return true;
